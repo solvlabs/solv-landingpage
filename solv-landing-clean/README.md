@@ -1,20 +1,10 @@
-# Solv Landing Page (Polished)
+# Solv Landing Page (Forced Effects)
 
-This repository contains the **polished** Solv landing page, including:
+This is the landing page with **always-on effects**:
+
 - IBM Plex Sans/Mono typography
-- Animated hero frame (conic gradient + SVG noise)
-- Modal video with bloom open + shadow pulse
-- Social icons (LinkedIn, X)
-- Electric border effect (PixiJS + GSAP) around hero and CTA buttons
+- Electric border effect (PixiJS + GSAP) always active around hero + CTA buttons
+- Modal with bloom animation + shadow pulse always active
+- Social links (LinkedIn, X)
 
-## Structure
-- `index.html`
-- `assets/`
-  - `Transparent Logo.svg` (your uploaded logo or a placeholder)
-
-## Deploy
-Connected to Vercel. Every push to `main` auto-deploys.  
-Primary domain: https://solvrisk.xyz
-
----
-© 2025 Solv. All rights reserved.
+Deployed via Vercel.
