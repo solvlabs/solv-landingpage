@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Solv — Underwriting AI Behavior in Real Time</title>
+  <meta name="description" content="Solv — Making autonomous AI insurable at inference speed.">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--radius:28px;--thickness:2px;--size-max:1000px;--anim-speed-1:14s;--anim-speed-2:18s}
+    html,body{height:100%}
+    body{margin:0;background:#000;color:#fff;font-family:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    main{min-height:100dvh;display:grid;place-items:center;padding:24px}
+    .wrapper{position:relative;width:min(92vw,var(--size-max));aspect-ratio:16/9;max-height:78dvh}
+    .box{position:absolute;inset:0;display:block}
+    .border{position:absolute;inset:0;padding:var(--thickness);border-radius:var(--radius)}
+    .border::before{content:"";position:absolute;inset:0;border-radius:inherit;background:conic-gradient(from 0deg,#00E5FF,#7C4DFF,#00E5FF);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin var(--anim-speed-1) linear infinite}
+    .box:nth-child(2) .border::before{animation-duration:var(--anim-speed-2);animation-direction:reverse;opacity:.75}
+    .box:nth-child(1) .border{filter:url(#noise)}
+    .box:nth-child(2) .border{filter:url(#noise2)}
+    .fill{position:absolute;inset:1.5px;border-radius:calc(var(--radius) - 1.5px);background:rgba(10,10,10,.82);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);z-index:1}
+    .content{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:clamp(16px,3vw,40px);z-index:2}
+    .stack{display:grid;gap:clamp(14px,2.4vw,28px);justify-items:center}
+    .logo{width:min(260px,45vw);height:auto;filter:drop-shadow(0 6px 30px rgba(0,229,255,.25))}
+    .tagline{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:clamp(18px,2.6vw,26px);color:#E6F9FF;letter-spacing:.2px}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:12px 18px;font-weight:700;text-decoration:none;line-height:1;transition:transform .2s ease,box-shadow .2s ease,background .2s ease;position:relative;overflow:visible}
+    .btn.primary{background:#fff;color:#0A0A0A;box-shadow:0 10px 20px rgba(255,255,255,.06)}
+    .btn.primary:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(255,255,255,.14)}
+    .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer}
+    .btn.secondary:hover{background:rgba(255,255,255,.08)}
+    .social{display:flex;gap:14px;margin-top:6px}
+    .icon{width:22px;height:22px;color:#b7b7b7;display:inline-block}
+    .social a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.02);transition:background .2s ease,transform .2s ease,border-color .2s ease}
+    .social a:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);transform:translateY(-1px)}
+    .modal-backdrop{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:100}
+    .modal-backdrop[open]{display:grid;animation:fadeIn .22s ease-out}
+    .modal{width:min(92vw,940px);border-radius:20px;background:#0a0a0a;border:1px solid rgba(255,255,255,.08);overflow:hidden;transform-origin:center;animation:bloom .32s cubic-bezier(.2,.9,.2,1) both,pulseShadow .6s ease-out .2s both}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .modal-title{font:600 14px 'IBM Plex Sans',sans-serif;color:#eaeaea;letter-spacing:.2px}
+    .modal-close{appearance:none;border:0;background:transparent;color:#bfbfbf;width:36px;height:36px;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+    .modal-close:hover{background:rgba(255,255,255,.06);color:#fff}
+    .modal-body{aspect-ratio:16/9;background:#000}
+    .modal-body iframe{width:100%;height:100%;border:0;display:block}
+    @keyframes bloom{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.02);opacity:1}100%{transform:scale(1);opacity:1}}
+    @keyframes pulseShadow{0%{box-shadow:0 30px 120px rgba(0,0,0,0.0)}50%{box-shadow:0 40px 160px rgba(0,229,255,0.3)}100%{box-shadow:0 30px 120px rgba(0,0,0,0.8)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion: reduce){body:not(.effects-on) .modal-backdrop[open]{animation:none}body:not(.effects-on) .modal{animation:none}}
+  </style>
+</head>
+<body class="effects-on">
+  <main>
+    <div class="wrapper" role="banner" aria-label="Solv hero">
+      <div class="box"><div class="border"></div></div>
+      <div class="box"><div class="border"></div></div>
+      <div class="fill" aria-hidden="true"></div>
+
+      <div class="content">
+        <div class="stack">
+          <img class="logo" src="/assets/Transparent Logo.svg" alt="Solv" />
+          <p class="tagline">Making autonomous AI insurable at inference speed.</p>
+          <div class="actions">
+            <a class="btn primary" href="mailto:patrick@solvrisk.xyz?subject=Solv%20—%20Get%20in%20touch">Get in touch</a>
+            <button id="openModal" class="btn secondary" type="button">Learn More</button>
+          </div>
+          <div class="social" aria-label="Social links">
+            <a href="https://www.linkedin.com/company/solvxyz/" aria-label="Solv on LinkedIn" target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003zM6.813 20.452H3.861V9h2.952v11.452zM5.337 7.433c-1.144 0-2.069-.927-2.069-2.07 0-1.144.925-2.069 2.069-2.069 1.144 0 2.07.925 2.07 2.069 0 1.143-.926 2.07-2.07 2.07zM20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.666H9.352V9h3.414v1.561h.049c.476-.9 1.637-1.852 3.37-1.852 3.605 0 4.27 2.372 4.27 5.455v6.288z"/></svg>
+            </a>
+            <a href="https://x.com/solvlabs" aria-label="Solv on X" target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M18.244 2H21l-6.54 7.47L22.5 22h-6.8l-5.32-6.93L3.9 22H1.14l6.99-7.98L1 2h6.86l4.94 6.53L18.24 2Zm-1.19 18h1.89L7.05 4h-1.9l11.9 16Z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="videoModal" class="modal-backdrop" aria-hidden="true" aria-labelledby="modalTitle" role="dialog">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">Solv — Overview</div>
+        <button id="closeModal" class="modal-close" type="button" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <iframe id="videoFrame" src="" title="Solv Intro Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <svg class="sr-only" aria-hidden="true" width="0" height="0">
+    <filter id="noise" x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turbulence" />
+      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="50" xChannelSelector="R" yChannelSelector="G" />
+      <feDropShadow dx="0" dy="4" stdDeviation="0" flood-color="hsl(280 90% 80%)" />
+    </filter>
+    <filter id="noise2" x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turbulence" />
+      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="50" xChannelSelector="R" yChannelSelector="G" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="hsl(10 90% 80%)" />
+    </filter>
+  </svg>
+
+  <script src="https://cdn.skypack.dev/pixi.js@6.5.8/dist/browser/pixi.min.js"></script>
+  <script src="https://cdn.skypack.dev/gsap@3.12.2/dist/gsap.min.js"></script>
+
+  <script>
+    function createElectricBorder(targetEl, opts = {}) {
+      if (!window.PIXI || !window.gsap || !targetEl) return;
+      const FORCE_EFFECTS = true;
+      if (!FORCE_EFFECTS && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const options = { radius: opts.radius ?? 24, thickness: opts.thickness ?? 2, color: opts.color ?? 0x00E5FF, intensity: opts.intensity ?? 24, zIndex: opts.zIndex ?? 20, padding: opts.padding ?? 0 };
+      const cs = getComputedStyle(targetEl);
+      if (cs.position === 'static') targetEl.style.position = 'relative';
+      const overlay = document.createElement('div');
+      overlay.style.position = 'absolute'; overlay.style.inset = `${-options.padding}px`; overlay.style.pointerEvents = 'none'; overlay.style.zIndex = options.zIndex;
+      targetEl.appendChild(overlay);
+      const app = new PIXI.Application({ resizeTo: overlay, backgroundAlpha: 0, antialias: true, powerPreference: 'high-performance' });
+      overlay.appendChild(app.view);
+      const g = new PIXI.Graphics(); app.stage.addChild(g);
+      const noiseSize = 256, noiseCanvas = document.createElement('canvas'); noiseCanvas.width = noiseCanvas.height = noiseSize;
+      const nctx = noiseCanvas.getContext('2d'); const imgData = nctx.createImageData(noiseSize, noiseSize);
+      for (let i = 0; i < imgData.data.length; i += 4){ const v = Math.random() * 255; imgData.data[i]=v; imgData.data[i+1]=v; imgData.data[i+2]=v; imgData.data[i+3]=255; }
+      nctx.putImageData(imgData, 0, 0);
+      const texture = PIXI.Texture.from(noiseCanvas, { wrapMode: PIXI.WRAP_MODES.REPEAT });
+      const noiseSprite = new PIXI.TilingSprite(texture, noiseSize, noiseSize); app.stage.addChild(noiseSprite); noiseSprite.alpha = 0.0;
+      const dispFilter = new PIXI.filters.DisplacementFilter(noiseSprite); dispFilter.scale.x = options.intensity; dispFilter.scale.y = options.intensity; app.stage.filters = [dispFilter];
+      function draw(){ const w = overlay.clientWidth, h = overlay.clientHeight; g.clear(); g.lineStyle(options.thickness, options.color, 1);
+        const r = Math.max(0, Math.min(options.radius, Math.min(w, h) / 2 - options.thickness)); g.drawRoundedRect(options.thickness, options.thickness, w - options.thickness*2, h - options.thickness*2, r);
+        g.filters = [new PIXI.filters.BlurFilter(1.4), new PIXI.filters.AlphaFilter(0.95)]; }
+      const ro = new ResizeObserver(draw); ro.observe(overlay); draw();
+    }
+  </script>
+
+  <script>
+    const openBtn = document.getElementById('openModal');
+    const closeBtn = document.getElementById('closeModal');
+    const modal = document.getElementById('videoModal');
+    const iframe = document.getElementById('videoFrame');
+    const YT_URL = 'https://www.youtube-nocookie.com/embed/-nls6846TPs?autoplay=1&modestbranding=1&rel=0';
+    function openModal(){ modal.setAttribute('open',''); modal.removeAttribute('aria-hidden'); iframe.src = YT_URL; setTimeout(() => closeBtn && closeBtn.focus(), 50); document.documentElement.style.overflow = 'hidden'; }
+    function closeModal(){ modal.removeAttribute('open'); modal.setAttribute('aria-hidden','true'); iframe.src = ''; document.documentElement.style.overflow = ''; openBtn && openBtn.focus(); }
+    openBtn && openBtn.addEventListener('click', openModal);
+    closeBtn && closeBtn.addEventListener('click', closeModal);
+    modal && modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && modal.hasAttribute('open')) closeModal(); });
+    window.addEventListener('load', () => {
+      const hero = document.querySelector('.fill'); if (hero) createElectricBorder(hero, { radius: 28, thickness: 2, color: 0x00E5FF, intensity: 22, padding: 4, zIndex: 12 });
+      document.querySelectorAll('.actions .btn').forEach((btn) => { btn.style.position = 'relative'; btn.style.overflow = 'visible'; createElectricBorder(btn, { radius: 999, thickness: 2, color: 0x00E5FF, intensity: 18, padding: 2, zIndex: 2 }); });
+    });
+  </script>
+</body>
+</html>

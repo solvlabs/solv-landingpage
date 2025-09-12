@@ -1,23 +1,25 @@
-# Solv Landing Page
+# Solv Landing Page (Fixed + Effects)
 
-This repository contains the source code for the **Solv** landing page.  
-It is a minimal, elegant, and responsive static site deployed via [Vercel](https://vercel.com).
+Production-ready static landing page for **Solv**.
 
-## Structure
-- `index.html` — main landing page
-- `assets/` — static assets (e.g. Solv logo, images)
+## Highlights
+- IBM Plex Sans/Mono typography
+- Electric border (PixiJS + GSAP) around hero card + CTA buttons (forced ON)
+- “Learn More” modal with bloom open + subtle shadow pulse
+- Contact CTA: `mailto:patrick@solvrisk.xyz`
+- Social: LinkedIn and X (official URLs)
+- Uses your uploaded logo at `assets/Transparent Logo.svg`
 
-## Features
-- Animated hero frame with Solv logo
-- Tagline: *“Making autonomous AI insurable at inference speed.”*
-- Calls-to-action: **Get in Touch** and **Learn More**
-- Embedded intro video modal with subtle animations
-- Social links (LinkedIn, X)
+## File Tree
+```
+solv-landing-clean/
+├── index.html
+├── README.md
+└── assets/
+    └── Transparent Logo.svg
+```
 
-## Deployment
-Every push to the `main` branch auto-deploys on Vercel.  
-Production domain: [https://solvrisk.xyz](https://solvrisk.xyz)
-
----
-
-© 2025 Solv. All rights reserved.
+## Deploy
+1. Upload these files to your GitHub repo at `solv-landing-clean/`.
+2. Commit directly to `main`. Vercel auto-deploys.
+3. Hard refresh your domain to bust cache (Cmd/Ctrl+Shift+R).
