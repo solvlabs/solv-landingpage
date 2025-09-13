@@ -1,25 +1,21 @@
-# Solv Landing Page (Fixed + Effects)
 
-Production-ready static landing page for **Solv**.
+# Solv Landing Page (Fixed with Electric Borders)
 
-## Highlights
-- IBM Plex Sans/Mono typography
-- Electric border (PixiJS + GSAP) around hero card + CTA buttons (forced ON)
-- “Learn More” modal with bloom open + subtle shadow pulse
-- Contact CTA: `mailto:patrick@solvrisk.xyz`
-- Social: LinkedIn and X (official URLs)
-- Uses your uploaded logo at `assets/Transparent Logo.svg`
+This repo contains the Solv landing page.
 
-## File Tree
-```
-solv-landing-clean/
-├── index.html
-├── README.md
-└── assets/
-    └── Transparent Logo.svg
-```
+## Features
+- Hero card with **electric border effect** (SVG turbulence + GSAP jitter)
+- Correct Solv logo (from `assets/Transparent Logo.svg`)
+- Tagline: *"Making autonomous AI insurable at inference speed."*
+- CTA buttons:
+  - **Get in touch** → opens email to patrick@solvrisk.xyz
+  - **Learn More** → opens YouTube modal with bloom + pulse
+- Social links:
+  - LinkedIn → [https://www.linkedin.com/company/solvxyz/](https://www.linkedin.com/company/solvxyz/)
+  - X → [https://x.com/solvlabs](https://x.com/solvlabs)
 
-## Deploy
-1. Upload these files to your GitHub repo at `solv-landing-clean/`.
-2. Commit directly to `main`. Vercel auto-deploys.
-3. Hard refresh your domain to bust cache (Cmd/Ctrl+Shift+R).
+## Deployment
+1. Upload all files (`index.html`, `README.md`, `assets/Transparent Logo.svg`) into `solv-landing-clean/` in your repo.
+2. Commit to `main` branch.
+3. Vercel auto-deploys.
+4. Open [https://solvrisk.xyz](https://solvrisk.xyz) and hard-refresh.
