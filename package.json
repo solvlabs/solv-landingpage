@@ -1,0 +1,14 @@
+{
+  "name": "solv-landing-minimal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "http-server -p 5173"
+  },
+  "dependencies": {
+    "three": "^0.160.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

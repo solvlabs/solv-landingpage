@@ -1,120 +1,163 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solv — Underwriting AI Behavior</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOLV — Minimal Landing</title>
+  <meta name="description" content="Making autonomous AI insurable at inference speed.">
   <style>
-    body {
-      margin: 0;
-      font-family: 'IBM Plex Sans', sans-serif;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    :root{
+      --bg:#0b0f14; --text:#eaf6ff; --accent:#be8c55; --btn:#ffffff; --btn-text:#0b0f14; --ring: rgba(190,140,85,.3);
     }
-    .hero {
-      position: relative;
-      padding: 2rem;
-      border-radius: 1rem;
-      background: #111;
-      text-align: center;
-      overflow: hidden;
-    }
-    .hero img {
-      width: 120px;
-      margin-bottom: 1rem;
-    }
-    .cta {
-      margin: 1rem 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 2rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: #fff;
-      color: #000;
-      position: relative;
-      z-index: 1;
-    }
-    .cta.secondary {
-      background: #000;
-      color: #fff;
-      border: 1px solid #fff;
-    }
-    .electric-overlay {
-      pointer-events: none;
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      border: 2px solid transparent;
-      filter: url(#noise);
-      animation: flicker 1s infinite;
-    }
-    @keyframes flicker {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-    .socials a {
-      margin: 0 0.5rem;
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.25rem;
-    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+    .reveal{opacity:0;transform:scale(.96);filter:blur(6px);animation:reveal .9s ease-out .2s forwards}
+    @keyframes reveal{to{opacity:1;transform:scale(1);filter:blur(0)}}
+    .wrap{position:fixed;inset:0;display:grid;place-items:center;padding:6vh 4vw}
+    .hero{width:min(960px,92vw);border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));box-shadow:0 10px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);position:relative;padding:clamp(24px,4vw,40px)}
+    .logo-area{display:grid;place-items:center;gap:18px;margin-top:clamp(12px,3vh,24px)}
+    #logoCanvas{width:min(220px,36vw);height:min(220px,36vw);display:block}
+    .brand{font-weight:650;letter-spacing:.25em;text-align:center;color:var(--accent);margin-top:2px}
+    .tagline{text-align:center;opacity:.92;font-size:clamp(18px,2.4vw,24px);margin:18px auto 28px}
+    .cta-row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+    .btn{appearance:none;border:0;border-radius:999px;padding:.9rem 1.2rem;font-weight:700;cursor:pointer;display:inline-flex;gap:.5rem;align-items:center;justify-content:center;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 8px 20px rgba(0,0,0,.35);transition:transform .12s ease,box-shadow .2s ease}
+    .btn:focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+    .btn.primary{background:var(--btn);color:var(--btn-text)} .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.12)}
+    .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0)}
+    .socials{display:flex;gap:10px;justify-content:center;margin:clamp(18px,3vh,26px) 0 4px}
+    .icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.12);color:var(--text);background:rgba(255,255,255,.02);transition:transform .12s ease,background .2s ease}
+    .icon-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)} .icon{width:18px;height:18px;display:block}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);opacity:0;pointer-events:none;transition:opacity .2s ease}
+    .modal{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none}
+    .modal-panel{width:min(960px,94vw);aspect-ratio:16/9;background:#000;border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.55);transform:translateY(12px) scale(.98);opacity:0;transition:transform .2s ease,opacity .2s ease;overflow:hidden}
+    .modal.open .modal-backdrop{opacity:1;pointer-events:all} .modal.open .modal-panel{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+    .close-x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.08);cursor:pointer}
+    @media (prefers-reduced-motion: reduce){.reveal{animation:none;opacity:1;transform:none;filter:none}.modal-backdrop,.modal-panel{transition:none}}
   </style>
+  <script type="importmap">
+  {"imports":{"three":"./node_modules/three/build/three.module.js","three/examples/jsm/":"./node_modules/three/examples/jsm/"}}
+  </script>
 </head>
 <body>
-  <div class="hero">
-    <img src="assets/Transparent Logo.svg" alt="Solv Logo">
-    <p>Making autonomous AI insurable at inference speed.</p>
-    <div>
-      <a href="mailto:patrick@solvrisk.xyz">
-        <button class="cta">Get in touch</button>
-      </a>
-      <button class="cta secondary" onclick="openModal()">Learn More</button>
-    </div>
-    <div class="socials">
-      <a href="https://www.linkedin.com/company/solvxyz/" target="_blank">in</a>
-      <a href="https://x.com/solvlabs" target="_blank">X</a>
-    </div>
-    <div class="electric-overlay"></div>
+  <div class="wrap">
+    <section class="hero reveal" aria-label="SOLV hero">
+      <div class="logo-area">
+        <canvas id="logoCanvas" aria-hidden="true"></canvas>
+        <div class="brand">SOLV</div>
+      </div>
+      <p class="tagline">Making autonomous AI insurable at inference speed.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="mailto:patrick@solvrisk.xyz">Get in touch</a>
+        <button class="btn secondary" id="learnBtn">Learn more</button>
+      </div>
+      <div class="socials" aria-label="Social links">
+        <a class="icon-btn" href="https://www.linkedin.com/company/solvxyz/" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4zM8.5 8.5h3.8v2h.1c.5-1 1.8-2.1 3.7-2.1 4 0 4.8 2.6 4.8 6v8.6h-4V16c0-1.7 0-3.9-2.4-3.9-2.4 0-2.8 1.8-2.8 3.7V23h-4V8.5z"/></svg>
+          <span class="sr-only">LinkedIn</span>
+        </a>
+        <a class="icon-btn" href="https://x.com/solvlabs" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.62 8.71L23.5 22h-6.89l-5.39-6.28L5.06 22H1.8l8.17-9.34L.5 2h7.04l4.86 5.54L18.24 2zm-1.2 18h1.87L7.03 4H5.07L17.04 20z"/></svg>
+          <span class="sr-only">X</span>
+        </a>
+      </div>
+    </section>
   </div>
 
-  <!-- Modal -->
-  <div id="videoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;">
-    <div style="position:relative;width:80%;max-width:800px;">
-      <iframe width="100%" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Intro Video" frameborder="0" allowfullscreen></iframe>
-      <button onclick="closeModal()" style="position:absolute;top:10px;right:10px;padding:0.5rem 1rem;">X</button>
+  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Learn more video">
+    <div class="modal-backdrop" id="backdrop"></div>
+    <div class="modal-panel">
+      <button class="close-x" id="closeModal" aria-label="Close video">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.3 5.71 12 12.01l6.3 6.29-1.41 1.41L10.59 13.4l-6.29 6.3-1.41-1.42 6.29-6.29L2.89 5.7 4.3 4.3l6.29 6.3 6.29-6.3 1.42 1.41Z"/></svg>
+      </button>
+      <iframe id="ytFrame" width="100%" height="100%" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
   </div>
 
-  <svg class="sr-only">
-    <filter id="noise" x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox">
-      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turbulence" />
-      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="50" xChannelSelector="R" yChannelSelector="G" />
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="hsl(200 90% 80%)" />
-    </filter>
-  </svg>
+  <script type="module">
+    import * as THREE from 'three';
+    import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-  <script src="https://cdn.skypack.dev/gsap@3.12.2"></script>
-  <script>
-    function openModal() {
-      document.getElementById('videoModal').style.display = 'flex';
-    }
-    function closeModal() {
-      document.getElementById('videoModal').style.display = 'none';
-    }
-    // Animate electric noise
-    const turb = document.querySelector('#noise feTurbulence');
-    let seed = 0;
-    gsap.ticker.add(() => {
-      turb.setAttribute('seed', seed++);
+    const canvas = document.getElementById('logoCanvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    const DPR = Math.min(2, window.devicePixelRatio || 1);
+    function size(){ renderer.setPixelRatio(DPR); renderer.setSize(canvas.clientWidth, canvas.clientHeight, false); }
+    size();
+
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(35, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
+    cam.position.set(0, .4, 5);
+    const controls = new OrbitControls(cam, renderer.domElement);
+    controls.enableZoom=false; controls.enablePan=false; controls.enableDamping=true; controls.dampingFactor=.06;
+
+    scene.add(new THREE.HemisphereLight(0x6bbcff, 0x001018, 0.9));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(2,3,4); scene.add(dir);
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, cam));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(canvas.clientWidth, canvas.clientHeight), 1.1, .9, .2);
+    composer.addPass(bloom);
+
+    const material = new THREE.MeshPhysicalMaterial({
+      color: 0x66ccff, metalness: 0, roughness: 0.08, transmission: .95, thickness: 1.2, ior: 1.45,
+      emissive: 0x1aa3ff, emissiveIntensity: 1.0, clearcoat: 1.0, clearcoatRoughness: .02
     });
+
+    function buildFromSVGData(data){
+      const group = new THREE.Group();
+      for (const path of data.paths){
+        const segs = (path.subPaths && path.subPaths.length) ? path.subPaths : SVGLoader.createShapes(path);
+        for (const seg of segs){
+          const pts = (seg.getSpacedPoints ? seg.getSpacedPoints(300) : seg.getPoints(300));
+          if (!pts || pts.length<2) continue;
+          const curve = new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p.x, -p.y, 0)));
+          const geom = new THREE.TubeGeometry(curve, 400, 0.06, 12, false);
+          const mesh = new THREE.Mesh(geom, material);
+          const halo = new THREE.Mesh(geom.clone(), new THREE.MeshBasicMaterial({color:0x66d1ff, transparent:true, opacity:.35, depthWrite:false }));
+          halo.toneMapped=false; halo.scale.multiplyScalar(1.02);
+          group.add(mesh, halo);
+        }
+      }
+      const b = new THREE.Box3().setFromObject(group); const s = new THREE.Vector3(); b.getSize(s);
+      const c = b.getCenter(new THREE.Vector3()); group.position.sub(c);
+      const target = 2.2; const scale = target / Math.max(s.x, s.y); group.scale.setScalar(scale);
+      group.rotation.x = THREE.MathUtils.degToRad(12);
+      return group;
+    }
+
+    new SVGLoader().load('Transparent%20Logo.svg', data => { scene.add(buildFromSVGData(data)); }, undefined, err=>console.warn('SVG load failed', err));
+
+    function onResize(){
+      size();
+      composer.setSize(canvas.clientWidth, canvas.clientHeight);
+      cam.aspect = canvas.clientWidth/canvas.clientHeight; cam.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', onResize);
+
+    const clock = new THREE.Clock();
+    (function tick(){
+      const t = clock.getElapsedTime(); bloom.strength = 1.05 + Math.sin(t*.35)*.05;
+      controls.update(); composer.render(); requestAnimationFrame(tick);
+    })();
+
+    // Modal
+    const modal = document.getElementById('videoModal');
+    const learn = document.getElementById('learnBtn');
+    const closeBtn = document.getElementById('closeModal');
+    const backdrop = document.getElementById('backdrop');
+    const iframe = document.getElementById('ytFrame');
+    const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+    function openModal(){ iframe.src = YT_URL; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); iframe.src = ""; }
+    learn.addEventListener('click', openModal); closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
   </script>
 </body>
 </html>
