@@ -1,216 +1,152 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Solv | Insuring Autonomous AI</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solv | Insuring Autonomous AI</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- UPDATED META DESCRIPTION -->
+    <meta name="description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
 
-  <style>
-    :root{
-      --bg: #0e0f10;
-      --copy: #e9edf0;
-      --btn-bg: #191b1e;
-      --btn-bg-hover: #202328;
-      --accent: #c38d53;   /* bronze */
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
 
-    /* Base */
-    *,*::before,*::after{ box-sizing:border-box }
-    html,body{ height:100% }
-    body{
-      margin:0;
-      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1200px 800px at 50% 30%, #141618, var(--bg) 70%);
-      color:var(--copy);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
+    <style>
+      :root{
+        --bg:#0c0e10;
+        --panel:#121416;
+        --copy:#e9e4dc;
+        --muted:#c8c6c1;
+        --accent:#f8c884;
+        --accent-60: rgba(248,200,132,.6);
+        --accent-20: rgba(248,200,132,.2);
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0; background:radial-gradient(60% 70% at 50% 15%, #17191c 0%, #0c0e10 60%), var(--bg);
+        color:var(--copy); font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      .wrap{min-height:100%; display:grid; place-items:center; padding:48px 20px}
+      .card{
+        width:min(1120px, 94vw); aspect-ratio: 16/10; position:relative; border-radius:28px;
+        background: radial-gradient(100% 120% at 50% 0%, #151719 0%, #0f1113 60%, #0c0e10 100%);
+        overflow:hidden; box-shadow: 0 30px 120px rgba(0,0,0,.6), inset 0 0 200px rgba(0,0,0,.35);
+      }
+      /* Electric border */
+      .border{
+        position:absolute; inset:0; pointer-events:none; border-radius:28px; padding:10px;
+      }
+      .border::before{
+        content:""; position:absolute; inset:10px; border-radius:22px;
+        border:2px solid transparent;
+        background:
+          linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.2) 100%) padding-box,
+          radial-gradient(120% 200% at 50% 0%, rgba(248,200,132,.55), rgba(248,200,132,.15) 35%, rgba(248,200,132,.0) 60%) border-box;
+        filter: blur(.35px);
+        -webkit-mask:
+          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.004" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="12"/></filter><rect width="100%" height="100%" fill="white" filter="url(%23f)"/></svg>') center/cover no-repeat,
+          linear-gradient(#000,#000);
+        -webkit-mask-composite: source-in;
+                mask-composite: intersect;
+        opacity:.9;
+      }
 
-    /* Layout */
-    .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
-    .frame{
-      position:relative;
-      width:min(1120px, 92vw);
-      padding: clamp(28px, 4vw, 44px);
-      border-radius:20px;
-      background:
-        radial-gradient(120% 80% at 50% 0%, rgba(255,196,128,.06), transparent 60%),
-        linear-gradient(#101112, #0f1011);
-      box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
-      isolation:isolate;
-    }
+      .center{height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; padding:32px}
+      .logo-block{display:flex; flex-direction:column; align-items:center; gap:18px; transform:translateY(-6px)}
+      .emblem{width:min(160px, 22vw); height:auto; filter: drop-shadow(0 10px 35px rgba(248,200,132,.12))}
+      .wordmark{letter-spacing:.4rem; font-weight:700; font-size: clamp(18px, 1.4vw, 22px); color:var(--accent)}
 
-    /* Electric border */
-    .frame::before{
-      content:"";
-      position:absolute; inset:10px;
-      border-radius:18px;
-      border:2px solid var(--accent);
-      filter:url(#turbulent-displace) blur(0.8px);
-      box-shadow:
-        0 0 18px 2px rgba(226,158,88,.25),
-        0 0 48px 6px rgba(226,158,88,.14) inset;
-      pointer-events:none;
-    }
-    .frame::after{
-      content:""; position:absolute; inset:-18px; border-radius:28px;
-      box-shadow: 0 0 90px 14px rgba(226,158,88,.08);
-      pointer-events:none;
-    }
+      .tagline{
+        max-width:min(840px, 88%); text-align:center;
+        font-size:clamp(20px, 2.6vw, 28px); line-height:1.35; color:#e7e5df;
+        text-wrap:balance;
+      }
 
-    /* Hero */
-    .hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(18px, 2.6vw, 28px) }
-    /* Make the logo much bigger */
-    .logo-emblem{
-      width: clamp(200px, 26vw, 320px);   /* ← bigger */
-      height:auto; display:block;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
-      user-select:none;
-    }
+      .ctas{display:flex; gap:16px; flex-wrap:wrap; justify-content:center}
+      .btn{
+        font-weight:700; font-size:16px; line-height:1;
+        color:#eee; background:transparent; border:1.5px solid var(--accent-60);
+        padding:14px 20px; border-radius:14px; cursor:pointer; transition:all .2s ease;
+      }
+      .btn:hover{ background: rgba(248,200,132,.07); box-shadow: 0 0 0 2px var(--accent-20) inset; }
+      .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+      .btn--link{ text-decoration:none; display:inline-flex; align-items:center; gap:.5rem }
 
-    .tagline{
-      margin: 6px 0 0;
-      font-weight:600;
-      font-size: clamp(18px, 1.9vw, 28px);
-      line-height:1.35;
-      text-wrap:balance;
-      max-width:min(78ch, 90%);
-    }
+      .socials{display:flex; gap:14px; margin-top:6px}
+      .socials a{
+        display:grid; place-items:center; width:40px; height:40px; border-radius:12px;
+        border:1.2px solid rgba(255,255,255,.08); color:#dbd7cf; text-decoration:none;
+        background: rgba(255,255,255,.02); transition: all .2s ease;
+      }
+      .socials a:hover{ border-color:var(--accent-60); box-shadow:0 0 0 2px var(--accent-20) inset; }
 
-    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2.2vw, 24px); flex-wrap:wrap; justify-content:center }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
-      height:48px; padding:0 22px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.1);
-      background: var(--btn-bg); color: var(--copy);
-      text-decoration:none;
-      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif; /* same on both CTAs */
-      letter-spacing:.01em;
-      transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
-    }
-    .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
-    .btn:active{ transform: translateY(1px) }
-    .btn.primary{ border-color: rgba(255,199,124,.45) }
-    .btn.primary:hover{ border-color: rgba(255,199,124,.7) }
+      /* Modal */
+      .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:24px; z-index:40 }
+      .modal[open]{ display:flex; }
+      .scrim{position:absolute; inset:0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px);}
+      .sheet{ position:relative; max-width:min(980px, 92vw); aspect-ratio:16/9; width:100%; border-radius:14px; overflow:hidden; box-shadow:0 30px 120px rgba(0,0,0,.7) }
+      .sheet iframe{ width:100%; height:100%; border:0; display:block; background:#000 }
+      .sr-only{position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap}
+      footer.note{position:absolute; left:16px; bottom:12px; color:#9e9a93; font-size:12px; opacity:.85}
+      @media (max-width:560px){
+        .wordmark{letter-spacing:.32rem}
+      }
+    </style>
+  </head>
 
-    /* Socials */
-    .socials{ display:flex; gap:26px; margin-top: clamp(16px, 2.4vw, 28px) }
-    .socials a{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:10px;
-      color:var(--copy); text-decoration:none;
-      border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
-      transition: border-color .2s ease, background .2s ease, transform .06s ease;
-    }
-    .socials a:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
-    .socials svg{ width:18px; height:18px; fill: currentColor }
+  <body>
+    <main class="wrap">
+      <section class="card" aria-label="SOLV hero">
+        <div class="border" aria-hidden="true"></div>
 
-    /* Modal */
-    .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
-      display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
-    .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(900px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
-      overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
-    .modal iframe{ width:100%; height:100%; border:0; display:block }
+        <div class="center">
+          <div class="logo-block">
+            <!-- Use your repo's SVG so the "neon glass" render stays crisp -->
+            <img class="emblem" src="Transparent Logo.svg" alt="SOLV lion emblem" />
+            <div class="wordmark">SOLV</div>
+          </div>
 
-    .reveal{ animation: reveal .9s ease both }
-    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
+          <p class="tagline">Making autonomous AI insurable at inference speed.</p>
 
-    svg#fx{ position:absolute; width:0; height:0; overflow:hidden }
-  </style>
-</head>
-<body>
-  <!-- Filter for the electric border -->
-  <svg id="fx" aria-hidden="true" focusable="false">
-    <defs>
-      <filter id="turbulent-displace" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="noise1"/>
-        <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1"><animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="noise2"/>
-        <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2"><animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="noise3"/>
-        <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3"><animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="noise4"/>
-        <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4"><animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feComposite in="offsetNoise1" in2="offsetNoise2" operator="arithmetic" k2="1" k3="1" result="part1"/>
-        <feComposite in="offsetNoise3" in2="offsetNoise4" operator="arithmetic" k2="1" k3="1" result="part2"/>
-        <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise"/>
-        <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B"/>
-      </filter>
-    </defs>
-  </svg>
+          <div class="ctas" role="group" aria-label="Primary actions">
+            <a class="btn btn--link" href="mailto:patrick@solvrisk.xyz?subject=Hello%20from%20solvrisk.xyz">Get In Touch</a>
+            <button class="btn" type="button" data-open="#video-modal">Learn More</button>
+          </div>
 
-  <main class="wrap">
-    <section class="frame reveal" aria-label="SOLV hero">
-      <div class="hero">
-        <!-- Keep your SVG with emblem + small wordmark -->
-        <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
+          <div class="socials" aria-label="Social links">
+            <a href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" rel="noopener" target="_blank">in</a>
+            <a href="https://x.com/solvlabs" aria-label="X (Twitter)" rel="noopener" target="_blank">X</a>
+          </div>
 
-        <!-- Duplicate wordmark removed -->
-
-        <p class="tagline">Making autonomous AI insurable at inference speed.</p>
-
-        <div class="actions" role="group" aria-label="Primary actions">
-          <a class="btn primary" href="mailto:patrick@solvrisk.xyz">Get In Touch</a>
-          <a class="btn primary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal">Learn More</a>
+          <footer class="note">© SOLV</footer>
         </div>
+      </section>
+    </main>
 
-        <nav class="socials" aria-label="Social links">
-          <a href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
-          </a>
-          <a href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
-          </a>
-        </nav>
+    <!-- Modal (click scrim to close) -->
+    <dialog class="modal" id="video-modal" aria-labelledby="video-title">
+      <div class="scrim" data-close></div>
+      <div class="sheet" role="document">
+        <iframe
+          src="https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1"
+          title="SOLV overview video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+        <span id="video-title" class="sr-only">SOLV Overview</span>
       </div>
-    </section>
-  </main>
+    </dialog>
 
-  <!-- Video modal -->
-  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Product video">
-    <div class="modal-sheet" data-modal-sheet>
-      <iframe
-        id="ytFrame"
-        title="SOLV — Learn more"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
-    </div>
-  </div>
-
-  <script>
-  (() => {
-    const modal = document.getElementById('videoModal');
-    const sheet = modal.querySelector('[data-modal-sheet]');
-    const openBtn = document.getElementById('learnMoreBtn');
-    const frame = document.getElementById('ytFrame');
-    const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
-
-    function openModal(){
-      frame.src = YT_URL;
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      sheet.focus?.();
-    }
-    function closeModal(){
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
-      frame.src = "";
-      openBtn.focus?.();
-    }
-
-    openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-    modal.addEventListener('click', closeModal);           // click outside closes
-    sheet.addEventListener('click', e => e.stopPropagation());
-    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
-  })();
-  </script>
-</body>
+    <script>
+      // open / close modal
+      const openers = document.querySelectorAll("[data-open]");
+      const modal = document.querySelector("#video-modal");
+      openers.forEach(b => b.addEventListener("click", () => modal.showModal()));
+      modal?.addEventListener("click", (e) => {
+        if (e.target.hasAttribute("data-close")) modal.close();
+      });
+      document.addEventListener("keydown", e => { if (e.key === "Escape" && modal?.open) modal.close(); });
+    </script>
+  </body>
 </html>
