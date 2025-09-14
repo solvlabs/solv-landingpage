@@ -1,26 +1,28 @@
-# SOLV Minimal Landing
+# SOLV Minimal Landing (stable)
 
 Static, zero-build landing page.
 
-- Black → reveal animation
-- Three.js neon glass logo extruded from `Transparent Logo.svg`
-- Tagline + CTAs (“Get in touch”, “Learn More” with inline YouTube modal)
+- Fade-in from black
+- Electric border (animated) around the hero card
+- Centered SOLV logo (uses `Transparent Logo.svg` from the repo root)
+- Tagline + CTAs (mailto + modal YouTube)
 - LinkedIn + X social links
-- `vercel.json` sets `no-store` on HTML, and long caching for assets
-
-## Local preview
-
-Just open `index.html` directly. (No build step.)
+- `vercel.json` sets **no-store** for `index.html` and long caching for assets
 
 ## Deploy (GitHub → Vercel)
 
-1. Commit these four files to the repo root:
+1. Commit these files to your repo **root**:
    - `index.html`
-   - `Transparent Logo.svg`
    - `vercel.json`
    - `README.md`
-2. Vercel auto-deploys.
-3. In the new deployment, click **Redeploy** and **uncheck** “Use existing Build Cache” once to ensure no stale HTML remains.
-4. Make sure your domain (`solvrisk.xyz`) points to this project (and not the old one).
+   - (and keep your `Transparent Logo.svg` next to them)
 
-> To swap the logo, replace `Transparent Logo.svg` with your final asset while keeping the same filename.
+2. Vercel auto-deploys.
+
+3. If you previously used “Use existing Build Cache”, hit **Redeploy** once with it **unchecked** to ensure fresh HTML.
+
+4. Point your domain to this project (remove it from any old project).
+
+### Swapping the logo
+
+Replace `Transparent Logo.svg` with your final asset **keeping the same filename**.
