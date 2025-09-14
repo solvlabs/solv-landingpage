@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solv | Insuring Autonomous AI</title>
 
+  <!-- SEO -->
+  <meta name="description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
+  <link rel="canonical" href="https://solvrisk.xyz/">
+  <meta property="og:title" content="Solv | Insuring Autonomous AI">
+  <meta property="og:description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://solvrisk.xyz/">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Optional share image:
+  <meta property="og:image" content="https://solvrisk.xyz/og.jpg">
+  <meta name="twitter:image" content="https://solvrisk.xyz/og.jpg">
+  -->
+
   <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,9 +78,8 @@
 
     /* Hero */
     .hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(18px, 2.6vw, 28px) }
-    /* Make the logo much bigger */
     .logo-emblem{
-      width: clamp(200px, 26vw, 320px);   /* ← bigger */
+      width: clamp(200px, 26vw, 320px);
       height:auto; display:block;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       user-select:none;
@@ -89,7 +101,7 @@
       border:1px solid rgba(255,255,255,.1);
       background: var(--btn-bg); color: var(--copy);
       text-decoration:none;
-      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif; /* same on both CTAs */
+      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
       letter-spacing:.01em;
       transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
@@ -148,10 +160,12 @@
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
       <div class="hero">
-        <!-- Keep your SVG with emblem + small wordmark -->
-        <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
-
-        <!-- Duplicate wordmark removed -->
+        <img class="logo-emblem"
+             src="Transparent Logo.svg"
+             alt="SOLV logo"
+             fetchpriority="high"
+             decoding="async"
+             width="512" height="512" />
 
         <p class="tagline">Making autonomous AI insurable at inference speed.</p>
 
