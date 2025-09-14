@@ -5,126 +5,280 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SOLV — Minimal Landing</title>
   <meta name="description" content="Making autonomous AI insurable at inference speed." />
-  <style>
-    :root{
-      --bg:#0b0c0d; --panel:#131516; --text:#e9f3ef; --muted:#9aa6a0; --brand:#be8c55;
-      --panel-radius:28px; --edge:2px; --content-max:980px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-    .wrap{min-height:100dvh;display:grid;place-items:center;padding:32px;opacity:0;animation:fadeInUp .7s ease both}
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
-    .card{
-      width:min(92vw,var(--content-max));
-      background:radial-gradient(120% 140% at 50% 0%,#151719 0%,#101213 45%,#0e1011 100%);
-      border-radius:var(--panel-radius); padding:clamp(28px,4vw,44px); position:relative;
+  <style>
+    /* ========= Brand & theme ========= */
+    :root{
+      --bg: #0b0d0e;
+      --panel: #111416;
+      --text: rgba(247,248,248,.92);
+      --muted: rgba(247,248,248,.6);
+      --accent: #be8c55;                      /* gold copper */
+      --accent-soft: color-mix(in oklch, var(--accent), black 70%);
+      --logo-size: clamp(180px, 20vw, 280px); /* lion size */
+      --content-max: 1000px;
     }
-    .card::before{
-      content:""; position:absolute; inset:0; border-radius:calc(var(--panel-radius) - 2px);
-      border:var(--edge) solid var(--brand); filter:url(#turbulent-displace);
-      box-shadow:inset 0 0 .5px rgba(190,140,85,.75), inset 0 0 8px rgba(190,140,85,.25);
+
+    /* ========= Reset ========= */
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 50% -10%, #14181a 20%, transparent 60%) no-repeat, var(--bg);
+      color: var(--text);
+    }
+    img{ max-width:100%; height:auto; display:block; }
+
+    /* ========= Layout ========= */
+    .wrap{
+      min-height:100dvh;
+      display:grid;
+      place-items:center;
+      padding: clamp(16px, 4vw, 40px);
+    }
+
+    /* ========= Electric border (Bálint Ferenczy-inspired) ========= */
+    .frame{
+      position: relative;
+      width: min(1200px, 92vw);
+      background:
+        radial-gradient(60% 50% at 50% 0%, rgba(255,255,255,.06), transparent 60%) ,
+        linear-gradient(#121517, #0f1213);
+      border-radius: 22px;
+      padding: clamp(28px, 4vw, 48px) clamp(22px, 4vw, 40px) clamp(36px, 6vw, 64px);
+      isolation: isolate;
+    }
+
+    /* the animated torn edge */
+    .frame::before,
+    .frame::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius: 22px;
       pointer-events:none;
     }
-
-    .inner{max-width:880px;margin-inline:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:28px}
-
-    /* ⬇️ Updated: no circular wrapper, just a bigger logo image */
-    .logo{ width:clamp(180px, 24vw, 280px); height:auto; }
-    .logo img{ width:100%; height:auto; display:block; }
-
-    .h1{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:clamp(20px,2.4vw,28px);line-height:1.25;font-weight:600;letter-spacing:.02em}
-
-    .cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-    .btn{
-      appearance:none;border:1px solid rgba(255,255,255,.18);background:#0f1213;color:var(--text);
-      padding:12px 18px;border-radius:26px;font-weight:700;transition:.18s ease;cursor:pointer;font-size:15px;
+    .frame::before{
+      border: 2px solid var(--accent);
+      filter: url(#turbulent-displace);
+      opacity:.95;
     }
-    .btn:hover{border-color:rgba(255,255,255,.32);transform:translateY(-1px)}
+    /* warm glowing halo under the edge */
+    .frame::after{
+      box-shadow: 0 0 28px 4px color-mix(in oklch, var(--accent) 85%, black 15%) inset,
+                  0 0 30px 8px color-mix(in oklch, var(--accent) 65%, black 35%);
+      opacity:.45;
+    }
 
-    /* ⬇️ Updated: remove green ring; primary now matches secondary */
-    .btn.primary{ border:1px solid rgba(255,255,255,.18); background:#0f1213; box-shadow:none; }
+    /* ========= Hero content ========= */
+    .hero{
+      max-width: var(--content-max);
+      margin-inline:auto;
+      text-align:center;
+    }
 
-    .social{display:flex;gap:22px;align-items:center;justify-content:center;margin-top:6px}
-    .social a{color:var(--text);text-decoration:none;opacity:.85;display:inline-flex;align-items:center;gap:8px}
-    .social svg{width:22px;height:22px;display:block}
-    .social a:hover{opacity:1}
+    .logo{
+      width: var(--logo-size);
+      margin-inline:auto;
+      margin-top: clamp(12px, 2vw, 16px);
+    }
 
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;padding:24px;z-index:20;backdrop-filter:blur(4px)}
-    .modal[open]{display:grid}
-    .modal__box{width:min(92vw,920px);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.15);box-shadow:0 10px 50px rgba(0,0,0,.55);animation:pop .18s ease-out both}
-    @keyframes pop{from{transform:scale(.985);opacity:.0}to{transform:none;opacity:1}}
-    .modal__close{position:absolute;top:14px;right:18px;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:8px 12px;cursor:pointer}
-    .spacer{height:4px}
+    .wordmark{
+      margin-top: clamp(6px, .8vw, 10px);
+      font-weight: 650;
+      letter-spacing: .22em;
+      color: var(--accent);
+      font-size: clamp(18px, 1.6vw, 22px);
+    }
+
+    .tagline{
+      margin: clamp(22px, 3vw, 32px) auto;
+      max-width: 46ch;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: clamp(20px, 2.4vw, 34px);
+      line-height: 1.35;
+      text-wrap: balance;
+      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
+
+    /* ========= CTAs ========= */
+    .cta-row{
+      display:flex; gap:14px; justify-content:center; align-items:center;
+      flex-wrap:wrap;
+      margin-top: clamp(12px, 2vw, 18px);
+    }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.18);
+      background:#0f1213;
+      color:var(--text);
+      padding:12px 18px;
+      border-radius:26px;
+      font-weight:700;
+      transition:transform .12s ease, border-color .12s ease, background .12s ease;
+      cursor:pointer;
+      font-size:15px;
+      text-decoration:none; /* no underline on anchors */
+    }
+    .btn:hover{
+      border-color: color-mix(in oklch, var(--accent), white 25%);
+      background: #121517;
+      transform: translateY(-1px);
+    }
+    .btn:active{ transform: translateY(0); }
+
+    /* ========= Socials ========= */
+    .socials{
+      display:flex; gap:20px; justify-content:center;
+      margin-top: clamp(26px, 3.5vw, 40px);
+    }
+    .socials a{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:34px; height:34px; border-radius:50%;
+      color:var(--text);
+      opacity:.9;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    .socials a:hover{ transform:translateY(-1px); opacity:1; }
+
+    /* ========= Modal ========= */
+    .modal{
+      position:fixed; inset:0; display:none;
+      place-items:center;
+      background: rgba(0,0,0,.6);
+      padding: 32px;
+      z-index: 40;
+      cursor:pointer; /* click anywhere to close */
+    }
+    .modal[open]{ display:grid; }
+    .modal__box{
+      width: min(1000px, 92vw);
+      aspect-ratio: 16 / 9;
+      background:#000;
+      border-radius: 14px;
+      overflow:hidden;
+      box-shadow: 0 20px 80px rgba(0,0,0,.55);
+      cursor:auto; /* but not over the video box */
+      position:relative;
+    }
+    .modal__close{
+      position:absolute; inset:12px 12px auto auto;
+      background: rgba(0,0,0,.55);
+      color:#fff; border:0; border-radius:10px; width:36px; height:36px;
+      display:grid; place-items:center; cursor:pointer;
+    }
+    .modal iframe{ width:100%; height:100%; border:0; display:block; }
   </style>
 </head>
 <body>
-  <!-- Electric border filter -->
-  <svg width="0" height="0" style="position:absolute">
+  <svg width="0" height="0" class="svg-defs" aria-hidden="true" focusable="false">
     <defs>
+      <!-- Animated turbulence/displacement filter for the electric edge -->
       <filter id="turbulent-displace" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="n1" seed="1"/>
-        <feOffset in="n1" dx="0" dy="0" result="o1"><animate attributeName="dy" values="700;0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="n2" seed="1"/>
-        <feOffset in="n2" dx="0" dy="0" result="o2"><animate attributeName="dy" values="0;-700" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="n3" seed="2"/>
-        <feOffset in="n3" dx="0" dy="0" result="o3"><animate attributeName="dx" values="490;0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="n4" seed="2"/>
-        <feOffset in="n4" dx="0" dy="0" result="o4"><animate attributeName="dx" values="0;-490" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feComposite in="o1" in2="o2" result="p1"/><feComposite in="o3" in2="o4" result="p2"/>
-        <feBlend in="p1" in2="p2" mode="color-dodge" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="B"/>
+        <!-- Two vertical waves -->
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="n1"/>
+        <feOffset in="n1" dx="0" dy="0" result="o1">
+          <animate attributeName="dy" values="700;0" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        </feOffset>
+
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="n2"/>
+        <feOffset in="n2" dx="0" dy="0" result="o2">
+          <animate attributeName="dy" values="0;-700" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        </feOffset>
+
+        <!-- Two horizontal waves -->
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="n3"/>
+        <feOffset in="n3" dx="0" dy="0" result="o3">
+          <animate attributeName="dx" values="490;0" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        </feOffset>
+
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="n4"/>
+        <feOffset in="n4" dx="0" dy="0" result="o4">
+          <animate attributeName="dx" values="0;-490" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        </feOffset>
+
+        <feComposite in="o1" in2="o2" result="p1"/>
+        <feComposite in="o3" in2="o4" result="p2"/>
+        <feBlend in="p1" in2="p2" mode="color-dodge" result="mix"/>
+        <feDisplacementMap in="SourceGraphic" in2="mix" scale="30" xChannelSelector="R" yChannelSelector="B"/>
       </filter>
     </defs>
   </svg>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="inner">
-        <figure class="logo" aria-label="SOLV">
-          <img src="Transparent Logo.svg" alt="SOLV logo" />
-        </figure>
+  <div class="wrap">
+    <section class="frame">
+      <div class="hero">
+        <!-- Brand mark (use your repo's SVG so you can swap it anytime) -->
+        <img class="logo" src="Transparent Logo.svg" alt="SOLV Lion emblem and wordmark" />
 
-        <h1 class="h1">Making autonomous AI insurable at inference speed.</h1>
+        <p class="wordmark" aria-hidden="true">SOLV</p>
+
+        <p class="tagline">
+          Making autonomous AI insurable at inference speed.
+        </p>
 
         <div class="cta-row">
-          <a class="btn primary" href="mailto:patrick@solvrisk.xyz">Get in touch</a>
-          <button class="btn" data-modal-open="video">Learn More</button>
+          <a class="btn" href="mailto:patrick@solvrisk.xyz">Get in touch</a>
+          <button class="btn" data-modal-open="video" type="button">Learn More</button>
         </div>
 
-        <nav class="social" aria-label="Social links">
+        <nav class="socials" aria-label="Social links">
           <a href="https://www.linkedin.com/company/solvxyz/" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.08V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.43V23h-4V8.5z"/></svg>
+            <!-- LinkedIn icon -->
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.24 8.98H4.7V24H.24V8.98zM8.44 8.98h4.26v2.05h.06c.59-1.12 2.02-2.3 4.16-2.3 4.45 0 5.27 2.93 5.27 6.73V24h-4.46v-6.78c0-1.62-.03-3.7-2.25-3.7-2.25 0-2.6 1.76-2.6 3.58V24H8.44V8.98z" fill="currentColor"/>
+            </svg>
           </a>
-          <a href="https://x.com/solvlabs" target="_blank" rel="noopener" aria-label="X">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.58 8.66L23 22h-6.34l-4.96-6.17L5 22H1.744l8.13-9.29L2 2h6.42l4.48 5.73L18.244 2Zm-2.22 18h2.06L7.06 4H5l11.024 16Z"/></svg>
+          <a href="https://x.com/solvlabs" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <!-- X icon -->
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.09l-4.76-5.56L5.9 22H2.64l8.03-9.18L1.5 2h6.25l4.31 5.02L18.244 2Zm-2.13 18h1.18L7.96 4h-1.2l9.354 16Z" fill="currentColor"/>
+            </svg>
           </a>
         </nav>
-
-        <div class="spacer"></div>
       </div>
     </section>
-  </main>
+  </div>
 
-  <dialog class="modal" id="video-modal" aria-label="SOLV overview video">
-    <button class="modal__close" data-modal-close>Close ✕</button>
+  <!-- Video modal -->
+  <div class="modal" id="video-modal" aria-hidden="true" role="dialog" aria-label="SOLV video">
     <div class="modal__box">
-      <iframe width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen src="" id="ytframe"></iframe>
+      <button class="modal__close" type="button" data-modal-close aria-label="Close video">✕</button>
+      <iframe id="ytframe"
+              title="SOLV intro video"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
-  </dialog>
+  </div>
 
   <script>
-    const openBtn=document.querySelector('[data-modal-open="video"]');
-    const modal=document.getElementById('video-modal');
-    const closeBtn=modal.querySelector('[data-modal-close]');
-    const frame=document.getElementById('ytframe');
-    const YT="https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1";
-    openBtn.addEventListener('click',()=>{modal.setAttribute('open','');frame.src=YT;});
-    function closeModal(){modal.removeAttribute('open');frame.src="";}
-    closeBtn.addEventListener('click',closeModal);
-    modal.addEventListener('click',(e)=>{if(e.target===modal)closeModal();});
-    window.addEventListener('keydown',(e)=>{if(e.key==='Escape')closeModal();});
+    // Modal behavior (click outside to close, ESC to close)
+    const openBtn = document.querySelector('[data-modal-open="video"]');
+    const modal   = document.getElementById('video-modal');
+    const closeBtn= modal.querySelector('[data-modal-close]');
+    const frame   = document.getElementById('ytframe');
+    const YT = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1";
+
+    function openModal(){
+      modal.setAttribute('open','');
+      modal.setAttribute('aria-hidden','false');
+      frame.src = YT;
+    }
+    function closeModal(){
+      modal.removeAttribute('open');
+      modal.setAttribute('aria-hidden','true');
+      frame.src = "";
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+    // Close when clicking the dim backdrop (but not inside the video box)
+    const box = modal.querySelector('.modal__box');
+    modal.addEventListener('click', (e)=>{
+      if (!box.contains(e.target)) closeModal();
+    });
   </script>
 </body>
 </html>
