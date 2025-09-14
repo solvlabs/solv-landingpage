@@ -1,16 +1,22 @@
+# SOLV Minimal Landing — Clean bundle
 
-# SOLV Minimal Landing — GitHub/Vercel bundle
+This folder is ready to commit to **GitHub** and deploy on **Vercel** (static site, no build step).
 
-This folder is ready to commit at your repo root and deploy with Vercel (static site).
+## Files
+- `index.html` — CDN ESM imports (no build). Contains the neon 3D logo hero and modal video.
+- `Transparent Logo.svg` — your logo used to draw the neon tubes.
+- `vercel.json` — HTTP headers to avoid `index.html` being cached while caching assets long-term.
 
-Files:
-- `index.html` — uses CDN ESM imports (no build step)
-- `Transparent Logo.svg` — logo source for the 3D neon tubes
-- `vercel.json` — cache headers (HTML not cached, assets long-cached)
+## Deploy (GitHub + Vercel)
+1. Create a new empty repo **or** delete existing files in the current repo.
+2. Upload the three files in this folder to the repo root (not inside a subfolder).
+3. In Vercel Project Settings → **Build & Output Settings**:
+   - Framework Preset: **Other**
+   - Build Command: _empty_
+   - Output Directory: `.`
+   - Root Directory: _empty_ (repo root)
+4. Redeploy and **uncheck “Use existing Build Cache.”**
 
-## Deploy via GitHub
-1. Replace the files in your repo root with these.
-2. Commit to a new branch and open a PR (or push to `main` if you prefer).
-3. Vercel will auto-deploy the Preview; verify the hero (black→reveal, animated logo, modal video).
-4. Merge to `main` → Production deploy.
-5. Project Settings → Domains: ensure `solvrisk.xyz` is attached to THIS project; remove it from any old project.
+## Verify
+- View Source and ensure the first line includes `<!-- BUILD: neon-hero`.
+- Check that `/Transparent%20Logo.svg` loads directly.
