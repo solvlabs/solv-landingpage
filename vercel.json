@@ -1,17 +1,16 @@
 {
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/index.html",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-store, must-revalidate"
         }
       ]
     },
     {
-      "source": "/(.*)\\.(svg|png|jpg|jpeg|gif|webp|avif)",
+      "source": "/(.*)\\.(js|css|svg|png|jpg|jpeg|gif|webp|ico)",
       "headers": [
         {
           "key": "Cache-Control",
