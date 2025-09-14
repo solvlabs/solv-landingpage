@@ -1,283 +1,324 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SOLV — Minimal Landing</title>
   <meta name="description" content="Making autonomous AI insurable at inference speed." />
 
+  <!-- Plus Jakarta Sans (free; feels premium like Almarena) -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    /* ========= Brand & theme ========= */
     :root{
-      --bg: #0b0d0e;
-      --panel: #111416;
-      --text: rgba(247,248,248,.92);
-      --muted: rgba(247,248,248,.6);
-      --accent: #be8c55;                      /* gold copper */
-      --accent-soft: color-mix(in oklch, var(--accent), black 70%);
-      --logo-size: clamp(180px, 20vw, 280px); /* lion size */
-      --content-max: 1000px;
+      /* Brand color for border & accents */
+      --electric-border-color: #c4915a; /* warm gold */
+      --electric-border-led: oklch(from var(--electric-border-color) 0.8 c h);
+      --page-bg: #0e0f10;
+      --panel-bg: #141617;
+      --text: #eef2f3;
+      --muted: #b7c0c4;
+      --btn-bg: #151819;
+      --btn-ring: rgba(255,255,255,.14);
+      --btn-ring-hover: rgba(255,255,255,.28);
+      --btn-text: #f4f7f8;
+      --shadow: 0 25px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.02);
     }
 
-    /* ========= Reset ========= */
-    *{ box-sizing:border-box; }
+    /* Reset / base */
+    *,*::before,*::after{ box-sizing: border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(1200px 800px at 50% -10%, #14181a 20%, transparent 60%) no-repeat, var(--bg);
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       color: var(--text);
+      background: radial-gradient(1200px 700px at 50% 25%, #161a1b 0%, #101213 60%, #0a0b0c 100%), var(--page-bg);
+      overflow-x:hidden;
     }
-    img{ max-width:100%; height:auto; display:block; }
+    a{ color:inherit; text-decoration:none; }
+    img{ display:block; max-width:100%; }
 
-    /* ========= Layout ========= */
+    /* Layout */
     .wrap{
       min-height:100dvh;
       display:grid;
       place-items:center;
-      padding: clamp(16px, 4vw, 40px);
+      padding:48px 20px;
     }
 
-    /* ========= Electric border (Bálint Ferenczy-inspired) ========= */
+    /* Electric border container (Bálint Ferenczy idea adapted) */
     .frame{
-      position: relative;
-      width: min(1200px, 92vw);
+      position:relative;
+      width:min(1100px, 92vw);
+      border-radius:28px;
+      padding: clamp(32px, 4vw, 56px);
       background:
-        radial-gradient(60% 50% at 50% 0%, rgba(255,255,255,.06), transparent 60%) ,
-        linear-gradient(#121517, #0f1213);
-      border-radius: 22px;
-      padding: clamp(28px, 4vw, 48px) clamp(22px, 4vw, 40px) clamp(36px, 6vw, 64px);
-      isolation: isolate;
+        radial-gradient(40% 80% at 50% 20%, rgba(255,255,255,.06), rgba(255,255,255,0) 70%),
+        var(--panel-bg);
+      box-shadow: var(--shadow);
+      isolation:isolate;
     }
 
-    /* the animated torn edge */
+    /* Animated “electric” border (SVG filter below) */
     .frame::before,
     .frame::after{
       content:"";
       position:absolute; inset:0;
-      border-radius: 22px;
+      border-radius:28px;
       pointer-events:none;
     }
     .frame::before{
-      border: 2px solid var(--accent);
-      filter: url(#turbulent-displace);
-      opacity:.95;
+      /* noisy, jagged edge */
+      border: 2px solid var(--electric-border-color);
+      filter: url(#turbulent-displace) blur(0.4px);
+      opacity: .95;
+      mix-blend-mode: screen;
     }
-    /* warm glowing halo under the edge */
     .frame::after{
-      box-shadow: 0 0 28px 4px color-mix(in oklch, var(--accent) 85%, black 15%) inset,
-                  0 0 30px 8px color-mix(in oklch, var(--accent) 65%, black 35%);
-      opacity:.45;
+      /* soft ambient glow behind the stroke */
+      box-shadow:
+        0 0 60px 12px color-mix(in oklch, var(--electric-border-color) 60%, black 40%) inset,
+        0 0 26px 0 color-mix(in oklch, var(--electric-border-color) 55%, black 45%),
+        0 0 120px 4px color-mix(in oklch, var(--electric-border-color) 45%, black 55%);
+      opacity: .6;
     }
 
-    /* ========= Hero content ========= */
+    /* Hero content */
     .hero{
-      max-width: var(--content-max);
-      margin-inline:auto;
+      display:grid;
+      gap: clamp(16px, 2.6vw, 28px);
+      justify-items:center;
       text-align:center;
+      animation: fadeUp .9s ease-out both;
+    }
+    @keyframes fadeUp{
+      from{ opacity:0; transform: translateY(12px) scale(.98); }
+      to  { opacity:1; transform: translateY(0)   scale(1); }
     }
 
     .logo{
-      width: var(--logo-size);
-      margin-inline:auto;
-      margin-top: clamp(12px, 2vw, 16px);
-    }
-
-    .wordmark{
-      margin-top: clamp(6px, .8vw, 10px);
-      font-weight: 650;
-      letter-spacing: .22em;
-      color: var(--accent);
-      font-size: clamp(18px, 1.6vw, 22px);
+      width: clamp(110px, 14vw, 180px);
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      filter:
+        drop-shadow(0 12px 30px rgba(0,0,0,.55))
+        drop-shadow(0 1px 0 rgba(255,255,255,.04));
+      opacity:.98;
     }
 
     .tagline{
-      margin: clamp(22px, 3vw, 32px) auto;
-      max-width: 46ch;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-size: clamp(20px, 2.4vw, 34px);
-      line-height: 1.35;
+      font-size: clamp(22px, 2.4vw, 32px);
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: .02em;
+      color: var(--text);
+      max-width: 38ch;
       text-wrap: balance;
-      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+      margin-top: clamp(4px, .6vw, 10px);
     }
 
-    /* ========= CTAs ========= */
+    /* Buttons */
     .cta-row{
-      display:flex; gap:14px; justify-content:center; align-items:center;
-      flex-wrap:wrap;
-      margin-top: clamp(12px, 2vw, 18px);
+      display:flex;
+      gap:12px;
+      margin-top: clamp(8px, 1.2vw, 18px);
     }
     .btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.18);
-      background:#0f1213;
-      color:var(--text);
-      padding:12px 18px;
-      border-radius:26px;
-      font-weight:700;
-      transition:transform .12s ease, border-color .12s ease, background .12s ease;
-      cursor:pointer;
-      font-size:15px;
-      text-decoration:none; /* no underline on anchors */
+      appearance:none; border:0; cursor:pointer;
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; padding: 14px 20px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border-radius: 14px;
+      border: 1px solid var(--btn-ring);
+      transition: border-color .2s ease, transform .15s ease, background .2s ease;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none; /* ensure no underline in anchors */
     }
-    .btn:hover{
-      border-color: color-mix(in oklch, var(--accent), white 25%);
-      background: #121517;
-      transform: translateY(-1px);
-    }
+    .btn:hover{ border-color: var(--btn-ring-hover); transform: translateY(-1px); }
     .btn:active{ transform: translateY(0); }
 
-    /* ========= Socials ========= */
+    /* Socials */
     .socials{
-      display:flex; gap:20px; justify-content:center;
-      margin-top: clamp(26px, 3.5vw, 40px);
+      display:flex; gap:22px;
+      margin-top: clamp(14px, 2.0vw, 24px);
+      opacity:.92;
     }
-    .socials a{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:50%;
-      color:var(--text);
-      opacity:.9;
-      transition: transform .12s ease, opacity .12s ease;
+    .icon{
+      width: 28px; height: 28px; display:inline-block;
+      opacity:.88; transition: opacity .2s ease, transform .15s ease;
     }
-    .socials a:hover{ transform:translateY(-1px); opacity:1; }
+    .icon:hover{ opacity:1; transform: translateY(-1px); }
 
-    /* ========= Modal ========= */
+    /* Modal */
     .modal{
       position:fixed; inset:0; display:none;
-      place-items:center;
-      background: rgba(0,0,0,.6);
-      padding: 32px;
-      z-index: 40;
-      cursor:pointer; /* click anywhere to close */
+      place-items:center; z-index:50;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(6px);
     }
-    .modal[open]{ display:grid; }
-    .modal__box{
-      width: min(1000px, 92vw);
+    .modal.open{ display:grid; }
+    .modal-card{
+      width: min(960px, 92vw);
       aspect-ratio: 16 / 9;
-      background:#000;
-      border-radius: 14px;
+      border-radius: 16px;
       overflow:hidden;
-      box-shadow: 0 20px 80px rgba(0,0,0,.55);
-      cursor:auto; /* but not over the video box */
+      box-shadow: 0 30px 100px rgba(0,0,0,.65);
+      border: 1px solid rgba(255,255,255,.12);
+      background: #000;
       position:relative;
     }
-    .modal__close{
-      position:absolute; inset:12px 12px auto auto;
+    .modal-close{
+      position:absolute; top:8px; right:10px;
+      width:36px; height:36px; border-radius:999px;
+      display:grid; place-items:center;
       background: rgba(0,0,0,.55);
-      color:#fff; border:0; border-radius:10px; width:36px; height:36px;
-      display:grid; place-items:center; cursor:pointer;
+      color:#fff; border:1px solid rgba(255,255,255,.2);
+      cursor:pointer; font-size:18px; line-height:0;
+      z-index:2;
     }
-    .modal iframe{ width:100%; height:100%; border:0; display:block; }
+    .modal-close:hover{ background: rgba(255,255,255,.08); }
+
+    /* Small helper text footer */
+    .hint{
+      position:fixed; left:0; bottom:0; right:0;
+      text-align:center; color:#a6b0b4; opacity:.2;
+      font-size:12px; padding:10px 8px;
+      user-select:none; pointer-events:none;
+    }
+
+    /* Accessibility focus */
+    :focus-visible{
+      outline: 2px solid color-mix(in oklch, var(--electric-border-color) 80%, white 20%);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 520px){
+      .cta-row{ flex-direction:column; width: min(360px, 85vw); }
+      .btn{ width:100%; }
+    }
   </style>
 </head>
+
 <body>
-  <svg width="0" height="0" class="svg-defs" aria-hidden="true" focusable="false">
+  <!-- The SVG filter that animates the jagged “electric” edge -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute; left:-9999px; top:-9999px;">
     <defs>
-      <!-- Animated turbulence/displacement filter for the electric edge -->
       <filter id="turbulent-displace" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
-        <!-- Two vertical waves -->
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="n1"/>
-        <feOffset in="n1" dx="0" dy="0" result="o1">
-          <animate attributeName="dy" values="700;0" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
+        <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
+          <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
         </feOffset>
 
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="n2"/>
-        <feOffset in="n2" dx="0" dy="0" result="o2">
-          <animate attributeName="dy" values="0;-700" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
+        <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
+          <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
         </feOffset>
 
-        <!-- Two horizontal waves -->
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="n3"/>
-        <feOffset in="n3" dx="0" dy="0" result="o3">
-          <animate attributeName="dx" values="490;0" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
+        <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
+          <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
         </feOffset>
 
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="n4"/>
-        <feOffset in="n4" dx="0" dy="0" result="o4">
-          <animate attributeName="dx" values="0;-490" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
+        <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
+          <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
         </feOffset>
 
-        <feComposite in="o1" in2="o2" result="p1"/>
-        <feComposite in="o3" in2="o4" result="p2"/>
-        <feBlend in="p1" in2="p2" mode="color-dodge" result="mix"/>
-        <feDisplacementMap in="SourceGraphic" in2="mix" scale="30" xChannelSelector="R" yChannelSelector="B"/>
+        <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
+        <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
+        <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
       </filter>
     </defs>
   </svg>
 
-  <div class="wrap">
+  <main class="wrap">
     <section class="frame">
-      <div class="hero">
-        <!-- Brand mark (use your repo's SVG so you can swap it anytime) -->
-        <img class="logo" src="Transparent Logo.svg" alt="SOLV Lion emblem and wordmark" />
+      <div class="hero" role="region" aria-label="SOLV hero">
+        <!-- Only the logo image (includes the SOLV wordmark inside the SVG).
+             Keep the filename as-is so it matches your repo. -->
+        <img class="logo" src="Transparent Logo.svg" alt="SOLV logo" />
 
-        <p class="wordmark" aria-hidden="true">SOLV</p>
-
-        <p class="tagline">
-          Making autonomous AI insurable at inference speed.
-        </p>
+        <h1 class="tagline">Making autonomous AI insurable at inference speed.</h1>
 
         <div class="cta-row">
-          <a class="btn" href="mailto:patrick@solvrisk.xyz">Get in touch</a>
-          <button class="btn" data-modal-open="video" type="button">Learn More</button>
+          <a class="btn" href="mailto:patrick@solvrisk.xyz" rel="noopener">Get In Touch</a>
+          <button class="btn" id="openModal" type="button" aria-haspopup="dialog" aria-controls="videoModal">
+            Learn More
+          </button>
         </div>
 
-        <nav class="socials" aria-label="Social links">
-          <a href="https://www.linkedin.com/company/solvxyz/" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <!-- LinkedIn icon -->
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.24 8.98H4.7V24H.24V8.98zM8.44 8.98h4.26v2.05h.06c.59-1.12 2.02-2.3 4.16-2.3 4.45 0 5.27 2.93 5.27 6.73V24h-4.46v-6.78c0-1.62-.03-3.7-2.25-3.7-2.25 0-2.6 1.76-2.6 3.58V24H8.44V8.98z" fill="currentColor"/>
+        <div class="socials" aria-label="Social links">
+          <!-- LinkedIn -->
+          <a class="icon" href="https://www.linkedin.com/company/solvxyz/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" aria-hidden="true">
+              <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 22h4V7h-4v15zM8 22h4v-8.6c0-2.04 2.5-2.2 2.5 0V22h4v-9.94c0-5.8-6.54-5.58-7.5-2.73V7h-3c.04.98 0 15 0 15z"/>
             </svg>
           </a>
-          <a href="https://x.com/solvlabs" target="_blank" rel="noopener" aria-label="X (Twitter)">
-            <!-- X icon -->
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.09l-4.76-5.56L5.9 22H2.64l8.03-9.18L1.5 2h6.25l4.31 5.02L18.244 2Zm-2.13 18h1.18L7.96 4h-1.2l9.354 16Z" fill="currentColor"/>
+          <!-- X / Twitter -->
+          <a class="icon" href="https://x.com/solvlabs" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg viewBox="0 0 1200 1227" fill="currentColor" width="100%" height="100%" aria-hidden="true">
+              <path d="M714.163 519.284L1160.89 0H1046.26L667.137 438.118L364.216 0H0L468.75 681.821L0 1226.37H114.632L515.246 763.987L835.784 1226.37H1200L714.137 519.284H714.163ZM564.601 700.219L521.971 640.794L156.127 79.6943H311.003L603.9 496.807L646.53 556.233L1046.28 1150.3H891.406L564.601 700.245V700.219Z"/>
             </svg>
           </a>
-        </nav>
+        </div>
       </div>
     </section>
-  </div>
+  </main>
 
-  <!-- Video modal -->
-  <div class="modal" id="video-modal" aria-hidden="true" role="dialog" aria-label="SOLV video">
-    <div class="modal__box">
-      <button class="modal__close" type="button" data-modal-close aria-label="Close video">✕</button>
-      <iframe id="ytframe"
-              title="SOLV intro video"
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <!-- Video Modal -->
+  <div class="modal" id="videoModal" role="dialog" aria-modal="true" aria-label="SOLV intro video">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModal" aria-label="Close video">×</button>
+      <iframe
+        id="videoFrame"
+        title="SOLV — Learn More"
+        width="100%" height="100%"
+        src=""
+        data-src="https://www.youtube-nocookie.com/embed/-nls6846TPs?autoplay=1&modestbranding=1&rel=0&playsinline=1"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin">
+      </iframe>
     </div>
   </div>
 
+  <div class="hint">Rendering with animated electric border. Click “Learn More” for video. Click outside the video or press Esc to close.</div>
+
   <script>
-    // Modal behavior (click outside to close, ESC to close)
-    const openBtn = document.querySelector('[data-modal-open="video"]');
-    const modal   = document.getElementById('video-modal');
-    const closeBtn= modal.querySelector('[data-modal-close]');
-    const frame   = document.getElementById('ytframe');
-    const YT = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1";
+    // Modal open/close with autoplay and outside-click-to-close
+    const openBtn = document.getElementById('openModal');
+    const modal   = document.getElementById('videoModal');
+    const closeBtn= document.getElementById('closeModal');
+    const frame   = document.getElementById('videoFrame');
 
     function openModal(){
-      modal.setAttribute('open','');
-      modal.setAttribute('aria-hidden','false');
-      frame.src = YT;
+      if (!modal.classList.contains('open')){
+        frame.src = frame.dataset.src;   // start video
+        modal.classList.add('open');
+      }
     }
     function closeModal(){
-      modal.removeAttribute('open');
-      modal.setAttribute('aria-hidden','true');
-      frame.src = "";
+      modal.classList.remove('open');
+      // stop playback by clearing src; restore lazily next open
+      frame.src = '';
     }
 
     openBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
-    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 
-    // Close when clicking the dim backdrop (but not inside the video box)
-    const box = modal.querySelector('.modal__box');
+    // Close on overlay click (but not when clicking inside the card)
     modal.addEventListener('click', (e)=>{
-      if (!box.contains(e.target)) closeModal();
+      if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape
+    window.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
   </script>
 </body>
