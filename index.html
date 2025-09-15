@@ -6,6 +6,7 @@
   <title>Solv | Insuring Autonomous AI</title>
 
   <!-- SEO -->
+  <link rel="canonical" href="https://solvrisk.xyz/">
   <meta name="description" content="SOLV provides runtime observability, policy enforcement, and claims-grade evidence so insurers can price autonomous AI. Real-time, inference-speed proofs for safety and accountability.">
 
   <!-- Font -->
@@ -33,6 +34,10 @@
       /* warm hue sweep (oklch hue angles) */
       --hBase: 56;    /* yellow-gold start */
       --hStep: -1.15; /* trends to copper/bronze */
+
+      /* Subtle initial tilt so it feels 3D on first paint */
+      --mouseX: -0.2;
+      --mouseY: 0.18;
     }
 
     /* Base */
@@ -87,8 +92,12 @@
     .tunnel-container{
       perspective: 900px; transform-style: preserve-3d;
       position:relative; width:100%; height:100%;
-      transform: rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
-                 rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+
+      /* GPU compositor hints + transform baseline */
+      will-change: transform;
+      transform: translateZ(0)
+        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
       transition: transform .45s ease-out, filter .2s ease;
       filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
     }
@@ -148,6 +157,10 @@
     }
     .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
     .btn:active{ transform: translateY(1px) }
+    .btn:focus-visible{
+      outline:2px solid #e0a357;
+      outline-offset:3px;
+    }
     .btn.primary{ border-color: rgba(224,163,87,.55); padding:0 26px }
     .btn.primary:hover{ border-color: rgba(224,163,87,.8) }
     .btn.secondary{ border-color: rgba(255,255,255,.12) }
@@ -176,8 +189,17 @@
     .reveal{ animation: reveal .9s ease both }
     @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
 
+    /* Prefer reduced motion: freeze tilt */
     @media (prefers-reduced-motion: reduce){
       .tunnel-container{ transform:none !important; transition:none }
+    }
+
+    /* Mobile battery-saver tweaks (lighter GPU load) */
+    @media (max-width: 680px){
+      :root{
+        --depth-step: 30px;
+      }
+      .tunnel-frame{ inset: 6px; border-width: 6px; }
     }
   </style>
 </head>
@@ -275,8 +297,8 @@
       }
       box.addEventListener('mousemove', setMouse);
       box.addEventListener('mouseleave', ()=> {
-        root.style.setProperty('--mouseX', 0);
-        root.style.setProperty('--mouseY', 0);
+        root.style.setProperty('--mouseX', -0.2);  // reset to pleasant default tilt
+        root.style.setProperty('--mouseY', 0.18);
       });
     })();
 
