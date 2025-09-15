@@ -16,176 +16,123 @@
 
   <style>
     :root{
-      /* Theme */
-      --bg: #0e0f10;
-      --copy: #e9edf0;
+      --bg:#0e0f10;
+      --copy:#e9edf0;
       --muted:#aeb6bd;
       --btn-bg:#191b1e;
       --btn-bg-hover:#202328;
 
-      /* Tunnel controls (JS reads/adjusts these) */
-      --tunnel-frames: 24;
-      --depth-step: 38px;
-      --max-rotation: 18deg;
+      /* tunnel controls */
+      --frames: 26;            /* how many rings */
+      --scale-step: 0.028;     /* how much each inner ring shrinks */
+      --max-rotation: 18deg;   /* mouse tilt amount */
 
-      /* Gentle default tilt (so it looks 3D before input) */
-      --mouseX: -0.18;
-      --mouseY:  0.14;
+      /* small default tilt so it looks 3D at rest */
+      --mouseX:-0.18;
+      --mouseY: 0.14;
     }
 
     /* Base */
-    *,*::before,*::after{ box-sizing:border-box }
-    html,body{ height:100% }
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      color-scheme: dark;
-      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background-color: var(--bg); /* solid to avoid white flash */
-      background-image: radial-gradient(1100px 700px at 50% 28%, #151719 0%, var(--bg) 68%);
-      background-repeat: no-repeat;
+      color-scheme:dark;
+      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background-color:var(--bg);
+      background-image:radial-gradient(1100px 700px at 50% 28%,#151719 0%,var(--bg) 68%);
+      background-repeat:no-repeat;
       color:var(--copy);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
 
     /* Layout */
-    .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
+    .wrap{min-height:100dvh;display:grid;place-items:center;padding:4rem 1.25rem}
     .frame{
-      position:relative;
-      width:min(1160px, 95vw);
-      padding: clamp(18px, 2.4vw, 24px);
-      border-radius:20px;
-      background: linear-gradient(#101112, #0f1011);
-      box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
-      overflow:visible;
-      isolation:isolate;
+      position:relative;width:min(1160px,95vw);padding:clamp(18px,2.4vw,24px);
+      border-radius:20px;background:linear-gradient(#101112,#0f1011);
+      box-shadow:0 30px 120px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04) inset;
+      overflow:visible;isolation:isolate;
     }
 
-    /* Hero card (content area) */
+    /* Content card */
     .hero-box{
-      position:relative;
-      border-radius:22px;
-      background: #0c0d0f; /* solid dark center behind content */
-      padding: clamp(42px, 6vw, 72px) clamp(28px, 4.5vw, 56px) clamp(48px, 6.5vw, 84px);
-      box-shadow: 0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
+      position:relative;border-radius:22px;background:#0c0d0f;
+      padding:clamp(42px,6vw,72px) clamp(28px,4.5vw,56px) clamp(48px,6.5vw,84px);
+      box-shadow:0 10px 60px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.03) inset;
       overflow:visible;
     }
 
-    /* Tunnel sits AROUND hero-box, expanded outward so rings don't touch content */
+    /* Tunnel sits around the card (expanded outward) */
     .tunnel-wrapper{
-      position:absolute;
-      inset: -34px;                          /* expand beyond hero edges */
-      border-radius: calc(22px + 34px);
-      pointer-events:none;                   /* never intercept clicks */
-      z-index:1;                             /* below content */
-      display:grid; place-items:center;
-      overflow:visible;
+      position:absolute;inset:-36px;border-radius:calc(22px + 36px);
+      z-index:1;pointer-events:none;display:grid;place-items:center;overflow:visible;
     }
-    .tunnel-container{
-      perspective: 1000px;
-      transform-style: preserve-3d;
-      position:relative;
-      width:100%; height:100%;
-      will-change: transform;
-      transform: translateZ(0)
-        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
-        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
-      transition: transform .45s ease-out;
+    .tunnel{
+      position:relative;width:100%;height:100%;
+      transform:rotateX(calc(var(--mouseY) * var(--max-rotation) * -1))
+                rotateY(calc(var(--mouseX) * var(--max-rotation)));
+      transition:transform .45s ease-out;
+      will-change:transform;
+      perspective:1000px; /* harmless with scale-based approach, keeps future-proofing */
     }
 
-    /* Robust ring: two backgrounds + transparent border (no border-image) */
-    .tunnel-frame{
-      position:absolute;
-      inset: clamp(8px, 1vw, 14px);
-      border-radius: 28px;
-
-      /* JS sets --c1 / --c2 (ring gradient) and --glow color per frame */
+    /* One ring */
+    .ring{
+      position:absolute;inset:clamp(8px,1vw,14px);border-radius:28px;
+      /* gradient stroke using background-clip technique */
       background:
-        linear-gradient(#0c0d0f 0 0) padding-box,              /* inner fill */
-        linear-gradient(45deg, var(--c1,#f6d465), var(--c2,#b1642a)) border-box;
-      border: 8px solid transparent;                           /* reveals border gradient */
+        linear-gradient(#0c0d0f 0 0) padding-box,
+        linear-gradient(45deg,var(--c1),var(--c2)) border-box;
+      border:8px solid transparent;
       box-shadow:
-        0 0 18px var(--glow, rgba(226,158,88,.32)),
-        0 0 52px var(--glow, rgba(226,158,88,.18));
-      opacity: var(--alpha, 1);
-      transform: translateZ(var(--z, 0));
-      will-change: transform, opacity;
+        0 0 18px var(--glow),
+        0 0 52px var(--glow);
+      opacity:var(--alpha,1);
+      transform:scale(var(--s,1));
+      will-change:transform,opacity;
     }
 
     /* Foreground content */
-    .hero{
-      position:relative;
-      z-index:2;
-      display:flex; flex-direction:column;
-      align-items:center; text-align:center;
-      gap: clamp(16px, 2.4vw, 24px);
-    }
-    .logo-emblem{
-      width: clamp(260px, 30vw, 380px);
-      height:auto; display:block; user-select:none;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
-    }
-    h1{
-      margin: 6px 0 0; font-weight:700;
-      font-size: clamp(24px, 2.4vw, 34px); line-height:1.25;
-      text-wrap: balance;
-      max-width:min(34ch, 92%);
-    }
-    .subhead{
-      margin: 6px 0 0; color:var(--muted);
-      font-weight:500; font-size: clamp(15px, 1.35vw, 18px); line-height:1.45;
-      max-width:min(60ch, 92%);
-    }
+    .hero{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(16px,2.4vw,24px)}
+    .logo-emblem{width:clamp(260px,30vw,380px);height:auto;user-select:none;filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+    h1{margin:6px 0 0;font-weight:700;font-size:clamp(24px,2.4vw,34px);line-height:1.25;text-wrap:balance;max-width:min(34ch,92%)}
+    .subhead{margin:6px 0 0;color:var(--muted);font-weight:500;font-size:clamp(15px,1.35vw,18px);line-height:1.45;max-width:min(60ch,92%)}
 
     /* CTAs */
-    .actions{ display:flex; gap:14px; margin-top: clamp(14px, 2.1vw, 22px); flex-wrap:wrap; justify-content:center }
+    .actions{display:flex;gap:14px;margin-top:clamp(14px,2.1vw,22px);flex-wrap:wrap;justify-content:center}
     .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
-      height:48px; padding:0 22px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.1);
-      background: var(--btn-bg); color: var(--copy);
-      text-decoration:none; white-space:nowrap;
-      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-      letter-spacing:.01em;
-      transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+      display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:48px;padding:0 22px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.1);background:var(--btn-bg);color:var(--copy);text-decoration:none;white-space:nowrap;
+      font:600 16px/1 "Plus Jakarta Sans",system-ui,-apple-system,sans-serif;letter-spacing:.01em;
+      transition:background .2s ease,transform .06s ease,border-color .2s ease,box-shadow .2s ease;
     }
-    .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
-    .btn:active{ transform: translateY(1px) }
-    .btn.primary{ border-color: rgba(224,163,87,.55); padding:0 26px }
-    .btn.primary:hover{ border-color: rgba(224,163,87,.8) }
-    .btn.secondary{ border-color: rgba(255,255,255,.12) }
+    .btn:hover{background:var(--btn-bg-hover);border-color:rgba(255,255,255,.18)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{border-color:rgba(224,163,87,.55);padding:0 26px}
+    .btn.primary:hover{border-color:rgba(224,163,87,.8)}
+    .btn.secondary{border-color:rgba(255,255,255,.12)}
 
     /* Footer */
-    footer{ margin-top: clamp(14px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
-    .social{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:32px; height:32px; border-radius:10px;
-      color:var(--copy); text-decoration:none;
-      border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
-      transition: border-color .2s ease, background .2s ease, transform .06s ease;
-    }
-    .social:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
-    .social svg{ width:18px; height:18px; fill: currentColor }
-    .copyright{ width:100%; text-align:center; margin-top:6px; font-size:12px; color:#88939c }
+    footer{margin-top:clamp(14px,2.4vw,24px);display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+    .social{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;color:var(--copy);text-decoration:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);transition:border-color .2s ease,background .2s ease,transform .06s ease}
+    .social:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+    .social svg{width:18px;height:18px;fill:currentColor}
+    .copyright{width:100%;text-align:center;margin-top:6px;font-size:12px;color:#88939c}
 
     /* Modal */
-    .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
-      display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
-    .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(980px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
-      overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
-    .modal iframe{ width:100%; height:100%; border:0; display:block }
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;z-index:50}
+    .modal.open{opacity:1;visibility:visible}
+    .modal-sheet{width:min(980px,92vw);aspect-ratio:16/9;border-radius:16px;background:#000;overflow:hidden;box-shadow:0 20px 120px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06) inset}
+    .modal iframe{width:100%;height:100%;border:0;display:block}
 
-    .reveal{ animation: reveal .9s ease both }
-    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
+    .reveal{animation:reveal .9s ease both}
+    @keyframes reveal{from{opacity:0;transform:translateY(8px) scale(.995)}to{opacity:1;transform:none}}
 
-    /* Motion/accessibility */
-    @media (prefers-reduced-motion: reduce){
-      .tunnel-container{ transform:none !important; transition:none }
-    }
-    @media (max-width: 680px){
-      :root{ --depth-step: 30px }
-      .tunnel-frame{ inset: 6px; border-width: 6px }
+    @media (max-width:680px){
+      :root{ --frames: 18; --scale-step: 0.03 }
+      .ring{inset:6px;border-width:6px}
     }
   </style>
 </head>
@@ -193,15 +140,14 @@
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
       <div class="hero-box" id="heroBox">
-        <!-- Tunnel sits behind and around the card -->
+        <!-- Tunnel -->
         <div class="tunnel-wrapper" aria-hidden="true">
-          <div class="tunnel-container" id="tunnelContainer"></div>
+          <div class="tunnel" id="tunnel"></div>
         </div>
 
-        <!-- Foreground content -->
+        <!-- Content -->
         <div class="hero">
-          <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
-
+          <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo"/>
           <h1>Runtime evidence that makes autonomous AI insurable.</h1>
           <p class="subhead">Continuous observability, policy checks, and claims-grade logs—generated at inference time.</p>
 
@@ -209,13 +155,7 @@
             <a class="btn primary"
                href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
                aria-label="Talk to Solv by email">Talk to Solv</a>
-            <a class="btn secondary"
-               href="#"
-               id="learnMoreBtn"
-               role="button"
-               aria-haspopup="dialog"
-               aria-controls="videoModal"
-               aria-label="Why Solv? Watch a brief explainer">Why Solv?</a>
+            <a class="btn secondary" href="#" id="whySolvBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv? Quick explainer">Why Solv?</a>
           </div>
 
           <footer>
@@ -235,63 +175,53 @@
   <!-- Video modal -->
   <div class="modal" id="videoModal" aria-hidden="true" aria-label="SOLV demo video">
     <div class="modal-sheet" data-modal-sheet>
-      <iframe
-        id="ytFrame"
-        title="SOLV — Product demo"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
+      <iframe id="ytFrame" title="SOLV — Product demo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
   </div>
 
   <script>
-    /* ============
-       Tunnel (CodePen-style, production-safe)
-       ============ */
+    /* Build a reliable tunnel with scale (no 3D depth quirks) */
     (function(){
-      const root  = document.documentElement;
-      const card  = document.getElementById('heroBox');
-      const wrap  = document.getElementById('tunnelContainer');
+      const root = document.documentElement;
+      const card = document.getElementById('heroBox');
+      const tunnel = document.getElementById('tunnel');
 
-      // Fewer frames on small screens for perf
-      const mobile = window.matchMedia('(max-width: 680px)').matches;
-      const FRAMES = mobile ? 18 : (parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24);
-      const DEPTH  = parseFloat(getComputedStyle(root).getPropertyValue('--depth-step')) || 38;
+      const FRAMES = parseInt(getComputedStyle(root).getPropertyValue('--frames')) || 26;
+      const STEP   = parseFloat(getComputedStyle(root).getPropertyValue('--scale-step')) || 0.028;
 
-      // Bronze-family palette (yellow → gold → orange → copper → bronze)
-      const hues  = [52, 46, 36, 26, 20]; // H in HSL
-      const satA  = 88,  lightA = 60;     // bright edge
-      const satB  = 72,  lightB = 50;     // deeper edge
+      // Yellow → Gold → Orange → Copper → Bronze
+      const hues = [52, 47, 40, 30, 22]; // HSL hue stops
+      const lerp = (a,b,t)=>a+(b-a)*t;
 
-      const lerp = (a,b,t)=> a + (b-a)*t;
-
-      // Build frames (no experimental CSS)
       const frag = document.createDocumentFragment();
-      for (let i=0;i<FRAMES;i++){
-        const t = (FRAMES<=1) ? 0 : i/(FRAMES-1);
-        const pos = t*(hues.length-1);
-        const seg = Math.min(hues.length-2, Math.floor(pos));
-        const lt  = pos - seg;
-        const h   = lerp(hues[seg], hues[seg+1], lt);
-        const h2  = h - 10;
+      for(let i=0;i<FRAMES;i++){
+        const t  = (FRAMES<=1)?0:i/(FRAMES-1);
+        const p  = t*(hues.length-1);
+        const s  = Math.min(hues.length-2, Math.floor(p));
+        const lt = p - s;
+        const h  = lerp(hues[s], hues[s+1], lt);
+        const h2 = h - 10;
 
-        const c1 = `hsl(${h} ${satA}% ${lightA}%)`;
-        const c2 = `hsl(${h2} ${satB}% ${lightB}%)`;
-        const glow = `hsla(${h}, 75%, 58%, .28)`;
+        const c1 = `hsl(${h} 88% 60%)`;
+        const c2 = `hsl(${h2} 72% 50%)`;
+        const glow = `hsla(${h}, 80%, 55%, .26)`;
 
-        const f = document.createElement('div');
-        f.className = 'tunnel-frame';
-        f.style.setProperty('--c1', c1);
-        f.style.setProperty('--c2', c2);
-        f.style.setProperty('--glow', glow);
-        f.style.setProperty('--z', (-DEPTH * i) + 'px');
-        f.style.setProperty('--alpha', (1.02 - (i/FRAMES)).toFixed(3));
-        frag.appendChild(f);
+        const ring = document.createElement('div');
+        ring.className = 'ring';
+        ring.style.setProperty('--c1', c1);
+        ring.style.setProperty('--c2', c2);
+        ring.style.setProperty('--glow', glow);
+
+        // scale from outer (1) to inner (1 - step * i)
+        const sc = (1 - STEP * i);
+        ring.style.setProperty('--s', sc.toFixed(4));
+        ring.style.setProperty('--alpha', (1.02 - (i/FRAMES)).toFixed(3));
+
+        frag.appendChild(ring);
       }
-      wrap.appendChild(frag);
+      tunnel.appendChild(frag);
 
-      // Smooth tilt with rAF (no jank)
+      // Smooth mouse tilt
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
 
@@ -301,8 +231,8 @@
 
       function onMove(e){
         const r = card.getBoundingClientRect();
-        const mx = ((e.clientX - r.left) / r.width)  * 2 - 1;
-        const my = ((e.clientY - r.top)  / r.height) * 2 - 1;
+        const mx = ((e.clientX - r.left)/r.width)*2 - 1;
+        const my = ((e.clientY - r.top)/r.height)*2 - 1;
         targetX = mx; targetY = my;
       }
       function onLeave(){ targetX = -0.18; targetY = 0.14; }
@@ -311,21 +241,19 @@
       card.addEventListener('mouseleave', onLeave);
 
       (function tick(){
-        curX += (targetX - curX) * 0.08;
-        curY += (targetY - curY) * 0.08;
+        curX += (targetX - curX)*0.08;
+        curY += (targetY - curY)*0.08;
         root.style.setProperty('--mouseX', curX.toFixed(3));
         root.style.setProperty('--mouseY', curY.toFixed(3));
         requestAnimationFrame(tick);
       })();
     })();
 
-    /* ============
-       Modal (click-outside closes) + 720p hint
-       ============ */
+    /* Modal (click-outside closes) + 720p hint */
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
-      const open  = document.getElementById('learnMoreBtn');
+      const open  = document.getElementById('whySolvBtn');
       const frame = document.getElementById('ytFrame');
       const YT    = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
@@ -344,7 +272,7 @@
       open.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
       modal.addEventListener('click', closeModal);
       sheet.addEventListener('click', e => e.stopPropagation());
-      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+      window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
     })();
   </script>
 </body>
