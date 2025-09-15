@@ -23,12 +23,12 @@
       --btn-bg:#191b1e;
       --btn-bg-hover:#202328;
 
-      /* Tunnel controls (JS reads these) */
-      --tunnel-frames: 24;      /* desktop default; JS may lower on mobile */
+      /* Tunnel controls (JS reads/adjusts these) */
+      --tunnel-frames: 24;
       --depth-step: 38px;
       --max-rotation: 18deg;
 
-      /* Subtle initial tilt so it feels 3D before input */
+      /* Gentle default tilt (so it looks 3D before input) */
       --mouseX: -0.18;
       --mouseY:  0.14;
     }
@@ -61,9 +61,7 @@
       isolation:isolate;
     }
 
-    /* =========================================================
-       HERO BOX + TUNNEL (tunnel surrounds this box, never overlaps content)
-       ========================================================= */
+    /* Hero card (content area) */
     .hero-box{
       position:relative;
       border-radius:22px;
@@ -76,11 +74,12 @@
     /* Tunnel sits AROUND hero-box, expanded outward so rings don't touch content */
     .tunnel-wrapper{
       position:absolute;
-      inset: -34px;                         /* expand beyond hero edges */
+      inset: -34px;                          /* expand beyond hero edges */
       border-radius: calc(22px + 34px);
-      pointer-events:none;                  /* never intercept clicks */
-      z-index:1;                            /* below content */
+      pointer-events:none;                   /* never intercept clicks */
+      z-index:1;                             /* below content */
       display:grid; place-items:center;
+      overflow:visible;
     }
     .tunnel-container{
       perspective: 1000px;
@@ -94,29 +93,26 @@
       transition: transform .45s ease-out;
     }
 
-    /* Tunnel frame:
-       We simulate a “border-image” gradient ring using background layers,
-       which is more robust with rounded corners + 3D transforms. */
+    /* Robust ring: two backgrounds + transparent border (no border-image) */
     .tunnel-frame{
       position:absolute;
       inset: clamp(8px, 1vw, 14px);
       border-radius: 28px;
 
-      /* Colors are set from JS via CSS vars: --c1, --c2, --glow */
+      /* JS sets --c1 / --c2 (ring gradient) and --glow color per frame */
       background:
-        linear-gradient(#0c0d0f 0 0) padding-box, /* keeps interior black */
-        linear-gradient(45deg, var(--c1,#e8c656), var(--c2,#a25b23)) border-box;
-      border: 8px solid transparent;             /* exposes gradient ring */
+        linear-gradient(#0c0d0f 0 0) padding-box,              /* inner fill */
+        linear-gradient(45deg, var(--c1,#f6d465), var(--c2,#b1642a)) border-box;
+      border: 8px solid transparent;                           /* reveals border gradient */
       box-shadow:
         0 0 18px var(--glow, rgba(226,158,88,.32)),
         0 0 52px var(--glow, rgba(226,158,88,.18));
       opacity: var(--alpha, 1);
-
       transform: translateZ(var(--z, 0));
       will-change: transform, opacity;
     }
 
-    /* Foreground content sits above the tunnel */
+    /* Foreground content */
     .hero{
       position:relative;
       z-index:2;
@@ -183,12 +179,10 @@
     .reveal{ animation: reveal .9s ease both }
     @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
 
-    /* Accessibility / motion prefs */
+    /* Motion/accessibility */
     @media (prefers-reduced-motion: reduce){
       .tunnel-container{ transform:none !important; transition:none }
     }
-
-    /* Mobile guardrails */
     @media (max-width: 680px){
       :root{ --depth-step: 30px }
       .tunnel-frame{ inset: 6px; border-width: 6px }
@@ -199,9 +193,9 @@
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
       <div class="hero-box" id="heroBox">
-        <!-- Tunnel sits behind and OUTSIDE this hero-box -->
+        <!-- Tunnel sits behind and around the card -->
         <div class="tunnel-wrapper" aria-hidden="true">
-          <div class="tunnel-container" id="tunnel"></div>
+          <div class="tunnel-container" id="tunnelContainer"></div>
         </div>
 
         <!-- Foreground content -->
@@ -252,56 +246,52 @@
   </div>
 
   <script>
-    /* -----------------------------
-       3D TUNNEL (Option B: JS-generated frames)
-       Palette: Yellow → Gold → Orange → Copper → Bronze
-       ----------------------------- */
+    /* ============
+       Tunnel (CodePen-style, production-safe)
+       ============ */
     (function(){
-      const root = document.documentElement;
-      const heroBox = document.getElementById('heroBox');
-      const container = document.getElementById('tunnel');
+      const root  = document.documentElement;
+      const card  = document.getElementById('heroBox');
+      const wrap  = document.getElementById('tunnelContainer');
 
-      // Mobile guardrails: fewer frames on narrow screens
-      const isMobile = window.matchMedia('(max-width: 680px)').matches;
-      const FRAMES = isMobile ? 18 : (parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24);
+      // Fewer frames on small screens for perf
+      const mobile = window.matchMedia('(max-width: 680px)').matches;
+      const FRAMES = mobile ? 18 : (parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24);
       const DEPTH  = parseFloat(getComputedStyle(root).getPropertyValue('--depth-step')) || 38;
 
-      // Bronze family hues (HSL): yellow → gold → orange → copper → bronze
-      const hues = [54, 46, 34, 24, 18]; // tweakable; higher = more yellow
-      const satA = 80, lightA = 60;      // bright ring color
-      const satB = 70, lightB = 50;      // deeper ring color
+      // Bronze-family palette (yellow → gold → orange → copper → bronze)
+      const hues  = [52, 46, 36, 26, 20]; // H in HSL
+      const satA  = 88,  lightA = 60;     // bright edge
+      const satB  = 72,  lightB = 50;     // deeper edge
 
       const lerp = (a,b,t)=> a + (b-a)*t;
 
-      // Generate frames
+      // Build frames (no experimental CSS)
       const frag = document.createDocumentFragment();
-      for (let i=0; i<FRAMES; i++){
+      for (let i=0;i<FRAMES;i++){
         const t = (FRAMES<=1) ? 0 : i/(FRAMES-1);
-        const segPos = t * (hues.length - 1);
-        const seg = Math.min(hues.length - 2, Math.floor(segPos));
-        const lt = segPos - seg;
-        const h  = lerp(hues[seg], hues[seg+1], lt);
-        const h2 = h - 8;
+        const pos = t*(hues.length-1);
+        const seg = Math.min(hues.length-2, Math.floor(pos));
+        const lt  = pos - seg;
+        const h   = lerp(hues[seg], hues[seg+1], lt);
+        const h2  = h - 10;
 
         const c1 = `hsl(${h} ${satA}% ${lightA}%)`;
         const c2 = `hsl(${h2} ${satB}% ${lightB}%)`;
-        const glow = `hsla(${h}, 75%, 58%, 0.28)`;
+        const glow = `hsla(${h}, 75%, 58%, .28)`;
 
-        const depth = -1 * DEPTH * i;
-        const alpha = 1.02 - (i / FRAMES);
-
-        const frame = document.createElement('div');
-        frame.className = 'tunnel-frame';
-        frame.style.setProperty('--c1', c1);
-        frame.style.setProperty('--c2', c2);
-        frame.style.setProperty('--glow', glow);
-        frame.style.setProperty('--z', depth + 'px');
-        frame.style.setProperty('--alpha', alpha.toFixed(3));
-        frag.appendChild(frame);
+        const f = document.createElement('div');
+        f.className = 'tunnel-frame';
+        f.style.setProperty('--c1', c1);
+        f.style.setProperty('--c2', c2);
+        f.style.setProperty('--glow', glow);
+        f.style.setProperty('--z', (-DEPTH * i) + 'px');
+        f.style.setProperty('--alpha', (1.02 - (i/FRAMES)).toFixed(3));
+        frag.appendChild(f);
       }
-      container.appendChild(frag);
+      wrap.appendChild(frag);
 
-      // Pointer tilt (rAF-smoothed)
+      // Smooth tilt with rAF (no jank)
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
 
@@ -310,41 +300,37 @@
       let curX = targetX, curY = targetY;
 
       function onMove(e){
-        const r = heroBox.getBoundingClientRect();
-        const mx = ((e.clientX - r.left) / r.width) * 2 - 1;  // -1..1
-        const my = ((e.clientY - r.top)  / r.height) * 2 - 1; // -1..1
-        targetX = mx;
-        targetY = my;
+        const r = card.getBoundingClientRect();
+        const mx = ((e.clientX - r.left) / r.width)  * 2 - 1;
+        const my = ((e.clientY - r.top)  / r.height) * 2 - 1;
+        targetX = mx; targetY = my;
       }
-      function onLeave(){
-        targetX = -0.18;
-        targetY =  0.14;
-      }
-      heroBox.addEventListener('mousemove', onMove, {passive:true});
-      heroBox.addEventListener('mouseleave', onLeave);
+      function onLeave(){ targetX = -0.18; targetY = 0.14; }
 
-      function tick(){
+      card.addEventListener('mousemove', onMove, {passive:true});
+      card.addEventListener('mouseleave', onLeave);
+
+      (function tick(){
         curX += (targetX - curX) * 0.08;
         curY += (targetY - curY) * 0.08;
         root.style.setProperty('--mouseX', curX.toFixed(3));
         root.style.setProperty('--mouseY', curY.toFixed(3));
         requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+      })();
     })();
 
-    /* -----------------------------
+    /* ============
        Modal (click-outside closes) + 720p hint
-       ----------------------------- */
+       ============ */
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
-      const openBtn = document.getElementById('learnMoreBtn');
+      const open  = document.getElementById('learnMoreBtn');
       const frame = document.getElementById('ytFrame');
-      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
+      const YT    = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
       function openModal(){
-        frame.src = YT_URL;
+        frame.src = YT;
         modal.classList.add('open');
         modal.setAttribute('aria-hidden','false');
         sheet.focus?.();
@@ -353,9 +339,9 @@
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden','true');
         frame.src = "";
-        openBtn.focus?.();
+        open.focus?.();
       }
-      openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      open.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
       modal.addEventListener('click', closeModal);
       sheet.addEventListener('click', e => e.stopPropagation());
       window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
