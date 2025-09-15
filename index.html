@@ -18,173 +18,187 @@
       --bg: #0e0f10;
       --ink: #e9edf0;
       --muted:#aeb6bd;
+      --btn-bg:#1a1c1f;
+      --btn-bg-hover:#1f2226;
 
-      /* Solv metals */
-      --gold:   #E7BD76;
-      --bronze: #C38D53;
-      --copper: #9C6335; /* use sparingly in glow */
+      /* Brand metals (OKLCH hue angles; gold → bronze) */
+      --hBase: 64;           /* warm gold */
+      --hStep: -1.1;         /* shifts toward bronze/copper per frame */
 
-      /* tunnel controls */
-      --frames: 18;
+      /* Tunnel controls */
+      --frames: 16;
       --depth-step: 36px;
-      --max-rot: 12deg;
+      --max-rotation: 12deg;
 
-      /* hue in OKLCH (fallback provided) */
-      --hBase: 58;        /* yellow-gold */
-      --hStep: -1.1;      /* trends to bronze */
+      /* Anim registers (numeric custom props so they can animate) */
+      --hShift: 0;           /* small hue drift ±3 */
+      --glow: .38;           /* shadow/glow strength 0..1 */
     }
+
+    /* Register animatable custom properties (broad modern support) */
+    @property --hShift { syntax: "<number>"; inherits: false; initial-value: 0; }
+    @property --glow   { syntax: "<number>"; inherits: false; initial-value: .38; }
 
     /* Base */
     *,*::before,*::after{ box-sizing:border-box }
     html,body{ height:100% }
     body{
       margin:0;
-      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1100px 720px at 50% 28%, #151719, var(--bg) 68%);
+      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
       color:var(--ink);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      background:
+        radial-gradient(1200px 800px at 50% 24%, #141618, var(--bg) 62%);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
     /* Layout */
     .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
-    .stage{
+    .frame{
       position:relative;
       width:min(1160px, 95vw);
-      padding: clamp(14px, 2vw, 20px);
-      border-radius:20px;
-      background: linear-gradient(#101112, #0f1011);
-      box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
-      overflow:visible;
+      border-radius:22px;
+      background:linear-gradient(#101112,#0f1011);
+      box-shadow:0 28px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
       isolation:isolate;
+      overflow:visible;
+      padding: clamp(22px, 2.8vw, 30px);
     }
 
-    /* -------------------------------
-       HERO CARD + TUNNEL
-    --------------------------------*/
-    .hero-wrap{
+    /* HERO BOX: pure center, faint edge vignette (no color cast) */
+    .hero-box{
       position:relative;
-      border-radius:22px;
-      /* the tunnel lives OUTSIDE this card via a negative inset on its wrapper */
-    }
-
-    /* Glass rim: subtle highlight (top/left) + shadow (bottom/right) */
-    .hero-glass{
-      position:absolute; inset:0; border-radius:22px; pointer-events:none;
-    }
-    .hero-glass::before{
-      content:""; position:absolute; inset:0; border-radius:inherit;
+      border-radius:20px;
       background:
-        linear-gradient(160deg, rgba(231,189,118,.10), rgba(0,0,0,0) 40%),
-        linear-gradient(340deg, rgba(0,0,0,.28), rgba(0,0,0,0) 55%);
-      mix-blend-mode: screen;
-      pointer-events:none;
+        radial-gradient(110% 90% at 50% 40%, #0a0b0c 60%, #0a0b0c 62%, transparent 100%),
+        #0a0b0c;
+      box-shadow:0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
+      padding: clamp(48px, 6vw, 82px) clamp(32px, 5vw, 64px) clamp(56px, 7vw, 92px);
     }
 
-    .hero-card{
-      position:relative; z-index:2;
-      background: #0C0D0F; /* pure near-black for crisp type */
-      border-radius:22px;
-      padding: clamp(44px, 6vw, 72px) clamp(28px, 4.5vw, 56px) clamp(52px, 6.5vw, 84px);
-      box-shadow:
-        0 10px 60px rgba(0,0,0,.45),
-        0 0 0 1px rgba(255,255,255,.03) inset;
-    }
-
-    /* Tunnel wrapper sits OUTSIDE the hero card */
-    .tunnel-wrap{
-      position:absolute;
-      inset: -72px;                 /* generous breathing room */
-      border-radius: calc(22px + 72px);
-      display:grid; place-items:center;
-      pointer-events:none;
-      z-index:1;
-    }
+    /* TUNNEL behind hero-box, expanded outward so it never covers content */
     .tunnel{
-      perspective: 900px; transform-style: preserve-3d;
-      position:relative; width:100%; height:100%;
-      transform:
-        rotateX(calc(var(--mouseY,0) * var(--max-rot) * -1))
-        rotateY(calc(var(--mouseX,0) * var(--max-rot)));
-      transition: transform .6s ease;
-      filter: drop-shadow(0 14px 34px rgba(0,0,0,.42));
+      position:absolute; inset:-40px; border-radius:28px; pointer-events:none;
+      display:grid; place-items:center; z-index:1;
     }
-    .frame{
-      position:absolute;
-      inset: 16px;                  /* keeps lines near outside edge */
-      border-radius: 28px;
-      --i: 1;
-      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep));
+    .tunnel-3d{
+      perspective:960px; transform-style:preserve-3d; will-change:transform, filter;
+      width:100%; height:100%;
+      transform:
+        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+      transition: transform .45s ease-out, filter .2s ease;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+      animation: hueDrift 12s ease-in-out infinite, glowPulse 7s ease-in-out infinite;
+    }
+    .ring{
+      position:absolute; inset: clamp(10px, 1.1vw, 14px);
+      border-radius:26px;
+      --i:1; /* set inline */
+      /* compute hues per frame with a small animated shift */
+      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep) + var(--hShift));
       --hB: calc(var(--hA) - 10);
-      border: 6px solid;
-      border-image-slice: 1;
+      border:8px solid;
+      border-image-slice:1;
       border-image-source:
-        linear-gradient(45deg, oklch(72% 0.16 var(--hA)), oklch(68% 0.12 var(--hB)));
+        linear-gradient(45deg, oklch(72% 0.15 var(--hA)), oklch(68% 0.11 var(--hB)));
       box-shadow:
-        0 0 18px oklch(70% 0.14 var(--hA) / .30),
-        0 0 42px oklch(68% 0.12 var(--hB) / .18);
-      opacity: calc(1.03 - (var(--i) / var(--frames)));
+        0 0 18px oklch(70% 0.13 var(--hA) / calc(var(--glow) * .9)),
+        0 0 52px oklch(68% 0.11 var(--hB) / calc(var(--glow) * .55));
+      opacity: calc(.98 - (var(--i) / (var(--frames) + 3)));
       transform: translateZ(calc(-1 * var(--depth-step) * (var(--i) - 1)));
     }
-    @supports not (color: oklch(50% 0 0)){
-      .frame{ border-image-source: linear-gradient(45deg, var(--gold), var(--bronze)) }
+    /* Fallback if OKLCH unsupported */
+    @supports not (color: oklch(70% 0 50)){
+      .ring{
+        border-image-source: linear-gradient(45deg, #f3c96b, #c47933);
+        box-shadow: 0 0 18px rgba(233,179,90,.35), 0 0 52px rgba(196,121,51,.22);
+      }
     }
 
-    /* Hero content */
-    .hero{
-      display:flex; flex-direction:column; align-items:center; text-align:center;
-      gap: clamp(16px, 2.2vw, 22px);
+    @keyframes hueDrift{
+      0%   { --hShift:-3; }
+      50%  { --hShift: 3; }
+      100% { --hShift:-3; }
     }
+    @keyframes glowPulse{
+      0%,100% { --glow:.36; }
+      50%     { --glow:.50; }
+    }
+
+    /* Foreground content above the tunnel */
+    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(16px, 2.4vw, 24px) }
+
     .logo{
-      width: clamp(280px, 32vw, 400px);
-      height:auto; display:block; user-select:none;
-      filter: drop-shadow(0 12px 28px rgba(0,0,0,.48));
+      width: clamp(260px, 30vw, 360px); height:auto; display:block; user-select:none;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.45));
+      position:relative;
     }
+    /* tiny, barely-there eye glint sweep */
+    .logo::after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(16px 10px at 52% 44%, rgba(255,240,210,.10), transparent 60%),
+        radial-gradient(16px 10px at 48% 44%, rgba(255,240,210,.10), transparent 60%);
+      opacity:0;
+      animation: glint 1.2s ease-in-out 14s infinite;
+    }
+    @keyframes glint{
+      0%{ opacity:0; transform: translateX(-4px) }
+      30%{ opacity:.08 }
+      100%{ opacity:0; transform: translateX(4px) }
+    }
+
     .wordmark{
-      margin-top: 4px;
-      letter-spacing:.16em; font-weight:700;
-      color: var(--bronze); opacity:.96;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35);
+      margin-top:4px; letter-spacing:.04em;  /* slight tracking */
+      font-weight:700; font-size: clamp(18px, 2.2vw, 22px); color:#d2a36a;
+      text-shadow: 0 1px 0 rgba(0,0,0,.4);
+    }
+
+    .eyebrow{
+      margin-top:6px; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+      color:#d2a36a; opacity:.8;
     }
 
     h1{
-      margin: 10px 0 0; font-weight:700;
-      font-size: clamp(24px, 2.4vw, 34px); line-height:1.25;
-      text-wrap:balance; max-width:min(34ch, 92%);
-      letter-spacing:.01em;
+      margin:8px 0 0;
+      font-size: clamp(24px, 2.35vw, 36px);
+      font-weight:700; line-height:1.24; text-wrap:balance;
+      max-width:min(34ch, 92%);
     }
-    .sub{
-      margin: 4px 0 0; color:var(--muted);
-      font-weight:600; font-size: clamp(14px, 1.25vw, 18px); line-height:1.45;
-      max-width:min(60ch, 92%);
+    .subhead{
+      margin:4px 0 0; color:var(--muted);
+      font-weight:600; font-size: clamp(15px, 1.3vw, 18px); line-height:1.5;
+      max-width:min(62ch, 92%);
     }
 
-    /* CTAs: both styled like primary */
-    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2vw, 22px); flex-wrap:wrap; justify-content:center }
+    /* CTAs: equal-weight primary with bronze outline + inset highlight */
+    .actions{ display:flex; gap:14px; margin-top: clamp(14px, 2.1vw, 22px); flex-wrap:wrap; justify-content:center }
     .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      height:48px; padding:0 26px; border-radius:12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+      height:48px; padding:0 28px; border-radius:12px; white-space:nowrap;
+      background: var(--btn-bg);
+      color: var(--ink); text-decoration:none; font:600 16px/1 "Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
       border:1px solid rgba(224,163,87,.55);
-      background:#191b1e; color:var(--ink); text-decoration:none; white-space:nowrap;
-      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-      letter-spacing:.01em;
-      transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
-      box-shadow: 0 0 0 rgba(0,0,0,0);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .06s ease;
     }
     .btn:hover{
-      background:#202328; border-color: rgba(224,163,87,.85);
-      box-shadow: 0 0 24px rgba(195,141,83,.18);
+      background: var(--btn-bg-hover);
+      border-color: rgba(224,163,87,.85);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 0 18px rgba(224,163,87,.25);
     }
     .btn:active{ transform: translateY(1px) }
 
     /* Footer */
-    .footer{ margin-top: clamp(16px, 2.2vw, 22px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
+    footer{ margin-top: clamp(16px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
     .social{
       display:inline-flex; align-items:center; justify-content:center;
       width:32px; height:32px; border-radius:10px;
       color:var(--ink); text-decoration:none;
       border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
-      transition: border-color .2s ease, background .2s ease;
+      transition: border-color .2s ease, background .2s ease, transform .06s ease;
     }
     .social:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
     .social svg{ width:18px; height:18px; fill: currentColor }
@@ -194,55 +208,72 @@
     .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
       display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
     .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(980px, 92vw); aspect-ratio:16/9; border-radius:16px; background:#000;
+    .modal-sheet{ width: min(980px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
       overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
     .modal iframe{ width:100%; height:100%; border:0; display:block }
 
-    /* Motion guardrails */
-    @media (max-width: 680px){
-      .tunnel{ transform:none !important }
-    }
+    /* Reduced motion: freeze parallax & animations */
     @media (prefers-reduced-motion: reduce){
-      .tunnel{ transform:none !important; transition:none }
+      .tunnel-3d{ animation:none !important; transform:none !important; transition:none !important }
+      .logo::after{ animation:none !important }
     }
+
+    .reveal{ animation: reveal .8s ease both }
+    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <section class="stage">
-      <div class="hero-wrap" id="heroBox">
-        <!-- Tunnel sits outside the card -->
-        <div class="tunnel-wrap" aria-hidden="true">
-          <div class="tunnel" id="tunnel"></div>
+    <section class="frame reveal" aria-label="SOLV hero">
+      <!-- TUNNEL (behind hero) -->
+      <div class="tunnel" aria-hidden="true">
+        <div class="tunnel-3d" id="tunnel3d">
+          <!-- 16 rings; each gets its index via --i -->
+          <div class="ring" style="--i:1"></div>
+          <div class="ring" style="--i:2"></div>
+          <div class="ring" style="--i:3"></div>
+          <div class="ring" style="--i:4"></div>
+          <div class="ring" style="--i:5"></div>
+          <div class="ring" style="--i:6"></div>
+          <div class="ring" style="--i:7"></div>
+          <div class="ring" style="--i:8"></div>
+          <div class="ring" style="--i:9"></div>
+          <div class="ring" style="--i:10"></div>
+          <div class="ring" style="--i:11"></div>
+          <div class="ring" style="--i:12"></div>
+          <div class="ring" style="--i:13"></div>
+          <div class="ring" style="--i:14"></div>
+          <div class="ring" style="--i:15"></div>
+          <div class="ring" style="--i:16"></div>
         </div>
+      </div>
 
-        <!-- Glass rim + hero card -->
-        <div class="hero-glass" aria-hidden="true"></div>
-        <div class="hero-card">
-          <div class="hero">
-            <img class="logo" src="Transparent Logo.svg" alt="Solv lion logo" />
-            <div class="wordmark">SOLV</div>
+      <!-- HERO CONTENT (on top) -->
+      <div class="hero-box" id="heroBox">
+        <div class="hero">
+          <img class="logo" src="Transparent Logo.svg" alt="SOLV lion logo"/>
+          <div class="wordmark">SOLV</div>
 
-            <h1>Make autonomous AI insurable—with runtime evidence.</h1>
-            <p class="sub">Continuous observability, policy checks, and claims-grade logs—generated at inference time.</p>
+          <div class="eyebrow">SOLV</div>
+          <h1>Make autonomous AI insurable — with runtime evidence.</h1>
+          <p class="subhead">Continuous observability, policy checks, and claims-grade logs — generated at inference time.</p>
 
-            <div class="actions" role="group" aria-label="Primary actions">
-              <a class="btn"
-                 href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
-                 aria-label="Talk to Solv by email">Talk to Solv</a>
-              <a class="btn" href="#" id="whyBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv?">Why Solv?</a>
-            </div>
-
-            <div class="footer">
-              <a class="social" href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
-              </a>
-              <a class="social" href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
-              </a>
-              <div class="copyright">© Solv</div>
-            </div>
+          <div class="actions" role="group" aria-label="Primary actions">
+            <a class="btn"
+               href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
+               aria-label="Talk to Solv by email">Talk to Solv</a>
+            <a class="btn" href="#" id="whyBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv? Video">Why Solv?</a>
           </div>
+
+          <footer>
+            <a class="social" href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
+            </a>
+            <a class="social" href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
+            </a>
+            <div class="copyright">© Solv</div>
+          </footer>
         </div>
       </div>
     </section>
@@ -262,43 +293,28 @@
   </div>
 
   <script>
-    // Generate tunnel frames with explicit indexes (robust fallback vs. sibling-index())
+    // Parallax tilt (capped), motion-respecting
     (function(){
-      const tunnel = document.getElementById('tunnel');
-      const n = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--frames')) || 18;
-      for(let i=1;i<=n;i++){
-        const d = document.createElement('div');
-        d.className = 'frame';
-        d.style.setProperty('--i', i);
-        tunnel.appendChild(d);
-      }
-    })();
-
-    // Calm parallax on desktop only; disabled on small screens or reduced motion.
-    (function(){
-      const box = document.getElementById('heroBox');
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      const hero = document.getElementById('heroBox');
       const root = document.documentElement;
 
-      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const isSmall = () => window.matchMedia('(max-width: 680px)').matches;
-
-      if (reduce || isSmall()) return;
-
       function setMouse(e){
-        const r = box.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;   // 0..1
-        const y = (e.clientY - r.top) / r.height;   // 0..1
-        root.style.setProperty('--mouseX', (x * 2 - 1).toFixed(3));
-        root.style.setProperty('--mouseY', (y * 2 - 1).toFixed(3));
+        const r = hero.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        root.style.setProperty('--mouseX', (x*2 - 1).toFixed(3));
+        root.style.setProperty('--mouseY', (y*2 - 1).toFixed(3));
       }
-      box.addEventListener('mousemove', setMouse);
-      box.addEventListener('mouseleave', ()=> {
+      hero.addEventListener('mousemove', setMouse);
+      hero.addEventListener('mouseleave', ()=> {
         root.style.setProperty('--mouseX', 0);
         root.style.setProperty('--mouseY', 0);
       });
     })();
 
-    // Modal: "Why Solv?" opens a short video (720p hint); click outside to close.
+    // Modal open/close + 720p hint
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
@@ -310,13 +326,12 @@
         frame.src = YT_URL;
         modal.classList.add('open');
         modal.setAttribute('aria-hidden','false');
-        sheet.focus?.();
       }
       function closeModal(){
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden','true');
         frame.src = "";
-        openBtn.focus?.();
+        openBtn?.focus();
       }
       openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
       modal.addEventListener('click', closeModal);
