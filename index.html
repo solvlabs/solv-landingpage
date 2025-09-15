@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Solv | Insuring Autonomous AI</title>
-  <meta name="description" content="Solv makes autonomous AI insurable at inference speed with runtime trust, real-time risk scoring, and enforcement.">
 
-  <!-- Plus Jakarta Sans -->
+  <!-- SEO -->
+  <meta name="description" content="SOLV provides runtime observability, policy enforcement, and claims-grade evidence so insurers can price autonomous AI. Real-time, inference-speed proofs for safety and accountability.">
+
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,20 +17,14 @@
     :root{
       --bg: #0e0f10;
       --copy: #e9edf0;
-      --btn-bg: #191b1e;
-      --btn-bg-hover: #202328;
+      --muted:#aeb6bd;
+      --btn-bg:#191b1e;
+      --btn-bg-hover:#202328;
       --accent: #c38d53; /* bronze */
-
-      /* Shared padding so the tunnel hugs the content area */
-      --stage-pad: clamp(28px, 4vw, 44px);
-
-      /* Tunnel controls (warm-only palette) */
-      --mouseX: 0;
-      --mouseY: 0;
-      --frame-depth: 50px;
-      --max-rotation: 28deg;
-      --base-hue: 50;   /* bronze/orange start (warm) */
-      --hue-step: 2;    /* tiny step so we stay bronze→gold */
+      --accent-2:#e0a357; /* gold */
+      --accent-3:#a96f3b; /* deep bronze */
+      --tunnel-frames: 22;
+      --max-rotation: 24deg; /* a touch calmer */
     }
 
     /* Base */
@@ -37,7 +33,7 @@
     body{
       margin:0;
       font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1200px 800px at 50% 30%, #141618, var(--bg) 70%);
+      background: radial-gradient(1100px 700px at 50% 28%, #151719, var(--bg) 68%);
       color:var(--copy);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
@@ -45,120 +41,117 @@
 
     /* Layout */
     .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
-    .stage{
+    .frame{
       position:relative;
-      width:min(1120px, 92vw);
+      width:min(1120px, 94vw);
+      padding: clamp(28px, 4vw, 44px);
       border-radius:20px;
-      padding: var(--stage-pad);
-      background:
-        radial-gradient(110% 70% at 50% 0%, rgba(255,196,128,.06), transparent 60%),
-        linear-gradient(#101112, #0f1011);
+      background: linear-gradient(#101112, #0f1011);
       box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
       overflow:hidden;
       isolation:isolate;
     }
 
-    /* --- Tunnel (warm palette, full-size) --- */
-    .tunnel-wrapper-interactive {
-      position:absolute;
-      inset: var(--stage-pad);          /* align with content edges */
-      display:grid;
-      place-items:center;
-      overflow:hidden;
-      border-radius: 16px;
-      pointer-events:none;              /* decorative only */
+    /* Bronze tunnel (surrounds the content) */
+    .tunnel-wrapper{
+      position:absolute; inset:16px; pointer-events:none; display:grid; place-items:center;
+      border-radius:14px;
     }
-    .tunnel-container-interactive {
-      perspective: 1000px;
-      transform-style: preserve-3d;
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform:
-        rotateX(calc(var(--mouseY) * var(--max-rotation) * -1))
-        rotateY(calc(var(--mouseX) * var(--max-rotation)));
-      transition: transform 0.5s ease-out;
-      filter: drop-shadow(0 18px 48px rgba(0,0,0,.45));
+    .tunnel-container{
+      perspective: 900px; transform-style: preserve-3d;
+      position:relative; width: min(100%, 980px); height:min(68vh, 680px);
+      transform: rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+                 rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+      transition: transform .5s ease-out, filter .2s ease;
+      filter: drop-shadow(0 10px 28px rgba(0,0,0,.45));
     }
-    .tunnel-frame-interactive {
-      position:absolute;
-      inset:0;
-
-      /* Keep hues in a warm band only */
-      --frame-hue: calc(var(--base-hue) + (sibling-index() - 1) * var(--hue-step));
-
-      /* Warm gradient (bronze→gold) using nearby hue */
-      --tunnel-gradient: linear-gradient(
-        35deg,
-        oklch(78% 0.16 var(--frame-hue)),
-        oklch(72% 0.20 calc(var(--frame-hue) + 8))
-      );
-
-      border: 6px solid;
-      border-image-source: var(--tunnel-gradient);
+    .tunnel-frame{
+      position:absolute; inset:0; border-radius:26px;
+      --i: 1; /* will be set inline; kept for fallback */
+      --hueA: 36;  /* orange */
+      --hueB: 44;  /* gold */
+      --cA: oklch(72% 0.14 var(--hueA));
+      --cB: oklch(72% 0.12 var(--hueB));
+      border: 8px solid;
+      border-image-source: linear-gradient(45deg, var(--cA), var(--cB));
       border-image-slice: 1;
-      border-radius: 24px;
-
-      /* Warm glow that matches the frame color */
+      /* subtle, warm glow */
       box-shadow:
-        0 0 20px oklch(76% 0.18 var(--frame-hue) / 0.45),
-        0 0 40px oklch(76% 0.18 var(--frame-hue) / 0.25);
-
-      transform: translateZ(calc(-1 * var(--frame-depth) * (sibling-index() - 1)));
-      opacity: calc(1.06 - (sibling-index() / sibling-count()));
+        0 0 18px oklch(70% 0.12 var(--hueB)/.35),
+        0 0 54px oklch(70% 0.14 var(--hueA)/.25);
+      opacity: calc(1.06 - (var(--i) / var(--tunnel-frames)));
+      transform: translateZ(calc(-40px * (var(--i) - 1)));
+    }
+    @media (prefers-reduced-motion: reduce){
+      .tunnel-container{ transform:none !important; transition:none }
     }
 
-    /* Content */
-    .hero{ position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(18px, 2.6vw, 28px) }
+    /* Shadowed center to aid copy legibility */
+    .copy-veil{
+      position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(40% 34% at 50% 60%, rgba(0,0,0,.28), transparent 65%);
+      z-index:1;
+    }
+
+    /* Hero */
+    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap: clamp(16px, 2.4vw, 24px); text-align:center }
     .logo-emblem{
-      width: clamp(200px, 26vw, 320px);
-      height:auto; display:block;
+      width: clamp(260px, 30vw, 380px); /* ~+30% */
+      height:auto; display:block; user-select:none;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
-      user-select:none;
-      position:relative; z-index:2;
     }
-    .tagline{
-      margin: 6px 0 0;
-      font-weight:600;
-      font-size: clamp(18px, 1.9vw, 28px);
-      line-height:1.35;
+    h1{
+      margin: 6px 0 0; font-weight:700;
+      font-size: clamp(24px, 2.4vw, 34px); line-height:1.25;
       text-wrap:balance;
-      max-width:min(78ch, 90%);
-      position:relative; z-index:2;
+      max-width:min(34ch, 92%);
+    }
+    .subhead{
+      margin: 6px 0 0; color:var(--muted);
+      font-weight:500; font-size: clamp(15px, 1.35vw, 18px); line-height:1.45;
+      max-width:min(60ch, 92%);
     }
 
-    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2.2vw, 24px); flex-wrap:wrap; justify-content:center; position:relative; z-index:2 }
+    /* CTAs */
+    .actions{ display:flex; gap:14px; margin-top: clamp(14px, 2.1vw, 22px); flex-wrap:wrap; justify-content:center }
     .btn{
       display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
       height:48px; padding:0 22px; border-radius:12px;
       border:1px solid rgba(255,255,255,.1);
       background: var(--btn-bg); color: var(--copy);
-      text-decoration:none;
+      text-decoration:none; white-space:nowrap;
       font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
       letter-spacing:.01em;
       transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
     .btn:active{ transform: translateY(1px) }
-    .btn.primary{ border-color: rgba(255,199,124,.45) }
-    .btn.primary:hover{ border-color: rgba(255,199,124,.7) }
+    .btn.primary{ border-color: rgba(224,163,87,.55); padding:0 26px } /* slightly wider */
+    .btn.primary:hover{ border-color: rgba(224,163,87,.8) }
+    .btn.secondary{ border-color: rgba(255,255,255,.12) }
 
-    .socials{ display:flex; gap:26px; margin-top: clamp(16px, 2.4vw, 28px); position:relative; z-index:2 }
-    .socials a{
+    .reassure{
+      margin-top:8px; font-size:12px; color:var(--muted);
+    }
+
+    /* Footer socials */
+    footer{ margin-top: clamp(14px, 2.4vw, 28px); display:flex; gap:16px; align-items:center; justify-content:center }
+    .social{
       display:inline-flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:10px;
+      width:32px; height:32px; border-radius:10px;
       color:var(--copy); text-decoration:none;
       border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
       transition: border-color .2s ease, background .2s ease, transform .06s ease;
     }
-    .socials a:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
-    .socials svg{ width:18px; height:18px; fill: currentColor }
+    .social:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
+    .social svg{ width:18px; height:18px; fill: currentColor }
+    .tiny{ font-size:12px; color:#88939c; margin-left:8px }
 
     /* Modal */
     .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
       display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
     .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(900px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
+    .modal-sheet{ width: min(980px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
       overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
     .modal iframe{ width:100%; height:100%; border:0; display:block }
 
@@ -167,56 +160,78 @@
   </style>
 </head>
 <body>
-
   <main class="wrap">
-    <section class="stage reveal" aria-label="SOLV hero">
-      <!-- Warm tunnel underlay filling the inner area -->
-      <div class="tunnel-wrapper-interactive" id="tunnel">
-        <div class="tunnel-container-interactive">
-          <!-- deeper stack so large tunnel still feels dimensional -->
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
-          <div class="tunnel-frame-interactive"></div>
+    <section class="frame reveal" aria-label="SOLV hero">
+      <!-- Bronze tunnel (behind content) -->
+      <div class="tunnel-wrapper" aria-hidden="true">
+        <div class="tunnel-container" id="tunnel">
+          <!-- frames are duplicated for depth -->
+          <!-- 22 frames -->
+          <div class="tunnel-frame" style="--i:1"></div>
+          <div class="tunnel-frame" style="--i:2"></div>
+          <div class="tunnel-frame" style="--i:3"></div>
+          <div class="tunnel-frame" style="--i:4"></div>
+          <div class="tunnel-frame" style="--i:5"></div>
+          <div class="tunnel-frame" style="--i:6"></div>
+          <div class="tunnel-frame" style="--i:7"></div>
+          <div class="tunnel-frame" style="--i:8"></div>
+          <div class="tunnel-frame" style="--i:9"></div>
+          <div class="tunnel-frame" style="--i:10"></div>
+          <div class="tunnel-frame" style="--i:11"></div>
+          <div class="tunnel-frame" style="--i:12"></div>
+          <div class="tunnel-frame" style="--i:13"></div>
+          <div class="tunnel-frame" style="--i:14"></div>
+          <div class="tunnel-frame" style="--i:15"></div>
+          <div class="tunnel-frame" style="--i:16"></div>
+          <div class="tunnel-frame" style="--i:17"></div>
+          <div class="tunnel-frame" style="--i:18"></div>
+          <div class="tunnel-frame" style="--i:19"></div>
+          <div class="tunnel-frame" style="--i:20"></div>
+          <div class="tunnel-frame" style="--i:21"></div>
+          <div class="tunnel-frame" style="--i:22"></div>
         </div>
       </div>
+      <div class="copy-veil"></div>
 
-      <!-- Foreground content -->
       <div class="hero">
+        <!-- Brand -->
         <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
-        <p class="tagline">Making autonomous AI insurable at inference speed.</p>
 
+        <!-- Messaging -->
+        <h1>Runtime evidence that makes autonomous AI insurable.</h1>
+        <p class="subhead">Continuous observability, policy checks, and claims-grade logs—generated at inference time.</p>
+
+        <!-- Actions -->
         <div class="actions" role="group" aria-label="Primary actions">
-          <a class="btn primary" href="mailto:patrick@solvrisk.xyz">Get In Touch</a>
-          <a class="btn primary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal">Learn More</a>
+          <a class="btn primary"
+             href="mailto:patrick@solvrisk.xyz?subject=Insurability%20Assessment&body=Hi%20SOLV%20team%2C%20I%E2%80%99d%20like%20an%20insurability%20assessment%20for%20our%20AI.%20We%20use%3A%20_____%0AKey%20risks%20we%E2%80%99re%20concerned%20about%3A%20_____%0AThanks!"
+             aria-label="Request an insurability assessment by email">
+             Get Insurability Assessment
+          </a>
+          <a class="btn secondary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Watch a 2 minute product video">Watch 2-min demo</a>
         </div>
+        <div class="reassure">Free, 2 minutes. No code.</div>
 
-        <nav class="socials" aria-label="Social links">
-          <a href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
+        <!-- Footer: socials & © -->
+        <footer>
+          <a class="social" href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
           </a>
-          <a href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
+          <a class="social" href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
           </a>
-        </nav>
+          <span class="tiny">© SOLV</span>
+        </footer>
       </div>
     </section>
   </main>
 
   <!-- Video modal -->
-  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Product video">
+  <div class="modal" id="videoModal" aria-hidden="true" aria-label="SOLV demo video">
     <div class="modal-sheet" data-modal-sheet>
       <iframe
         id="ytFrame"
-        title="SOLV — Learn more"
+        title="SOLV — Product demo"
         allow="autoplay; encrypted-media; picture-in-picture"
         allowfullscreen
         referrerpolicy="strict-origin-when-cross-origin">
@@ -225,40 +240,41 @@
   </div>
 
   <script>
-    // mouse tracking on the CARD (so underlay can stay pointer-events:none)
-    (function () {
-      const stage = document.querySelector(".stage");
+    // --- Tunnel interactivity (mouse tilt), respectful of reduced-motion
+    (function(){
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
 
-      stage.addEventListener("mousemove", (e) => {
-        const rect = stage.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+      const frameEl = document.querySelector('.frame');
+      const root = document.documentElement;
 
-        const mouseX = (x / rect.width) * 2 - 1;
-        const mouseY = (y / rect.height) * 2 - 1;
-
-        document.documentElement.style.setProperty("--mouseX", mouseX);
-        document.documentElement.style.setProperty("--mouseY", mouseY);
-      });
-
-      stage.addEventListener("mouseleave", () => {
-        document.documentElement.style.setProperty("--mouseX", 0);
-        document.documentElement.style.setProperty("--mouseY", 0);
+      function setMouse(e){
+        const r = frameEl.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;   // 0..1
+        const y = (e.clientY - r.top) / r.height;   // 0..1
+        root.style.setProperty('--mouseX', (x * 2 - 1).toFixed(3));
+        root.style.setProperty('--mouseY', (y * 2 - 1).toFixed(3));
+      }
+      frameEl.addEventListener('mousemove', setMouse);
+      frameEl.addEventListener('mouseleave', ()=> {
+        root.style.setProperty('--mouseX', 0);
+        root.style.setProperty('--mouseY', 0);
       });
     })();
 
-    // video modal
-    (function () {
+    // --- Modal (click outside closes)
+    (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
       const openBtn = document.getElementById('learnMoreBtn');
       const frame = document.getElementById('ytFrame');
-      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
       function openModal(){
         frame.src = YT_URL;
         modal.classList.add('open');
         modal.setAttribute('aria-hidden','false');
+        sheet.focus?.();
       }
       function closeModal(){
         modal.classList.remove('open');
@@ -266,9 +282,8 @@
         frame.src = "";
         openBtn.focus?.();
       }
-
       openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-      modal.addEventListener('click', closeModal);
+      modal.addEventListener('click', closeModal);           // click outside closes
       sheet.addEventListener('click', e => e.stopPropagation());
       window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     })();
