@@ -1,197 +1,260 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Solv | Insuring Autonomous AI</title>
 
   <!-- SEO -->
-  <meta name="description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
-  <link rel="canonical" href="https://solvrisk.xyz/">
-  <meta property="og:title" content="Solv | Insuring Autonomous AI">
-  <meta property="og:description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://solvrisk.xyz/">
-  <meta name="twitter:card" content="summary_large_image">
-  <!-- Optional share image:
-  <meta property="og:image" content="https://solvrisk.xyz/og.jpg">
-  <meta name="twitter:image" content="https://solvrisk.xyz/og.jpg">
-  -->
+  <meta name="description" content="SOLV provides runtime observability, policy enforcement, and claims-grade evidence so insurers can price autonomous AI. Real-time, inference-speed proofs for safety and accountability.">
 
-  <!-- Plus Jakarta Sans -->
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg: #0e0f10;
-      --copy: #e9edf0;
-      --btn-bg: #191b1e;
-      --btn-bg-hover: #202328;
-      --accent: #c38d53;   /* bronze */
+      --ink: #e9edf0;
+      --muted:#aeb6bd;
+      --btn-bg:#1a1c1f;
+      --btn-bg-hover:#1f2226;
+
+      /* Brand metals (OKLCH hue angles; gold → bronze) */
+      --hBase: 64;           /* warm gold */
+      --hStep: -1.1;         /* shifts toward bronze/copper per frame */
+
+      /* Tunnel controls */
+      --frames: 16;
+      --depth-step: 36px;
+      --max-rotation: 12deg;
+
+      /* Anim registers (numeric custom props so they can animate) */
+      --hShift: 0;           /* small hue drift ±3 */
+      --glow: .38;           /* shadow/glow strength 0..1 */
     }
+
+    @property --hShift { syntax: "<number>"; inherits: false; initial-value: 0; }
+    @property --glow   { syntax: "<number>"; inherits: false; initial-value: .38; }
 
     /* Base */
     *,*::before,*::after{ box-sizing:border-box }
     html,body{ height:100% }
     body{
       margin:0;
-      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1200px 800px at 50% 30%, #141618, var(--bg) 70%);
-      color:var(--copy);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 50% 24%, #141618, var(--bg) 62%);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
     /* Layout */
     .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
     .frame{
       position:relative;
-      width:min(1120px, 92vw);
-      padding: clamp(28px, 4vw, 44px);
+      width:min(1160px, 95vw);
+      border-radius:22px;
+      background:linear-gradient(#101112,#0f1011);
+      box-shadow:0 28px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
+      isolation:isolate;
+      overflow:visible;
+      padding: clamp(22px, 2.8vw, 30px);
+    }
+
+    /* HERO BOX */
+    .hero-box{
+      position:relative;
       border-radius:20px;
       background:
-        radial-gradient(120% 80% at 50% 0%, rgba(255,196,128,.06), transparent 60%),
-        linear-gradient(#101112, #0f1011);
-      box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
-      isolation:isolate;
+        radial-gradient(110% 90% at 50% 40%, #0a0b0c 60%, #0a0b0c 62%, transparent 100%),
+        #0a0b0c;
+      box-shadow:0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
+      padding: clamp(48px, 6vw, 82px) clamp(32px, 5vw, 64px) clamp(56px, 7vw, 92px);
     }
 
-    /* Electric border */
-    .frame::before{
-      content:"";
-      position:absolute; inset:10px;
-      border-radius:18px;
-      border:2px solid var(--accent);
-      filter:url(#turbulent-displace) blur(0.8px);
+    /* TUNNEL */
+    .tunnel{
+      position:absolute; inset:-40px; border-radius:28px; pointer-events:none;
+      display:grid; place-items:center; z-index:1;
+    }
+    .tunnel-3d{
+      perspective:960px; transform-style:preserve-3d; will-change:transform, filter;
+      width:100%; height:100%;
+      transform:
+        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+      transition: transform .45s ease-out, filter .2s ease;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+      animation: hueDrift 12s ease-in-out infinite, glowPulse 7s ease-in-out infinite;
+    }
+    .ring{
+      position:absolute; inset: clamp(10px, 1.1vw, 14px);
+      border-radius:26px;
+      --i:1; /* set inline */
+      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep) + var(--hShift));
+      --hB: calc(var(--hA) - 10);
+      border:8px solid;
+      border-image-slice:1;
+      border-image-source:
+        linear-gradient(45deg, oklch(72% 0.15 var(--hA)), oklch(68% 0.11 var(--hB)));
       box-shadow:
-        0 0 18px 2px rgba(226,158,88,.25),
-        0 0 48px 6px rgba(226,158,88,.14) inset;
-      pointer-events:none;
+        0 0 18px oklch(70% 0.13 var(--hA) / calc(var(--glow) * .9)),
+        0 0 52px oklch(68% 0.11 var(--hB) / calc(var(--glow) * .55));
+      opacity: calc(.98 - (var(--i) / (var(--frames) + 3)));
+      transform: translateZ(calc(-1 * var(--depth-step) * (var(--i) - 1)));
     }
-    .frame::after{
-      content:""; position:absolute; inset:-18px; border-radius:28px;
-      box-shadow: 0 0 90px 14px rgba(226,158,88,.08);
-      pointer-events:none;
+    @supports not (color: oklch(70% 0 50)){
+      .ring{
+        border-image-source: linear-gradient(45deg, #f3c96b, #c47933);
+        box-shadow: 0 0 18px rgba(233,179,90,.35), 0 0 52px rgba(196,121,51,.22);
+      }
+    }
+    @keyframes hueDrift{ 0%{--hShift:-3} 50%{--hShift:3} 100%{--hShift:-3} }
+    @keyframes glowPulse{ 0%,100%{--glow:.36} 50%{--glow:.50} }
+
+    /* Foreground */
+    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(16px, 2.4vw, 24px) }
+
+    .logo{
+      width: clamp(260px, 30vw, 360px); height:auto; display:block; user-select:none;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.45));
+      position:relative;
+    }
+    .logo::after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(16px 10px at 52% 44%, rgba(255,240,210,.10), transparent 60%),
+        radial-gradient(16px 10px at 48% 44%, rgba(255,240,210,.10), transparent 60%);
+      opacity:0;
+      animation: glint 1.2s ease-in-out 14s infinite;
+    }
+    @keyframes glint{ 0%{opacity:0;transform:translateX(-4px)} 30%{opacity:.08} 100%{opacity:0;transform:translateX(4px)} }
+
+    h1{
+      margin:8px 0 0;
+      font-size: clamp(24px, 2.35vw, 36px);
+      font-weight:700; line-height:1.24; text-wrap:balance;
+      max-width:min(34ch, 92%);
+    }
+    .subhead{
+      margin:4px 0 0; color:var(--muted);
+      font-weight:600; font-size: clamp(15px, 1.3vw, 18px); line-height:1.5;
+      max-width:min(62ch, 92%);
     }
 
-    /* Hero */
-    .hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(18px, 2.6vw, 28px) }
-    .logo-emblem{
-      width: clamp(200px, 26vw, 320px);
-      height:auto; display:block;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
-      user-select:none;
-    }
-
-    .tagline{
-      margin: 6px 0 0;
-      font-weight:600;
-      font-size: clamp(18px, 1.9vw, 28px);
-      line-height:1.35;
-      text-wrap:balance;
-      max-width:min(78ch, 90%);
-    }
-
-    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2.2vw, 24px); flex-wrap:wrap; justify-content:center }
+    /* CTAs: equal-weight bronze outline */
+    .actions{ display:flex; gap:14px; margin-top: clamp(14px, 2.1vw, 22px); flex-wrap:wrap; justify-content:center }
     .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
-      height:48px; padding:0 22px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.1);
-      background: var(--btn-bg); color: var(--copy);
-      text-decoration:none;
-      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-      letter-spacing:.01em;
-      transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+      display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+      height:48px; padding:0 28px; border-radius:12px; white-space:nowrap;
+      background: var(--btn-bg);
+      color: var(--ink); text-decoration:none; font:600 16px/1 "Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+      border:1px solid rgba(224,163,87,.55);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .06s ease;
     }
-    .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
+    .btn:hover{
+      background: var(--btn-bg-hover);
+      border-color: rgba(224,163,87,.85);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 0 18px rgba(224,163,87,.25);
+    }
     .btn:active{ transform: translateY(1px) }
-    .btn.primary{ border-color: rgba(255,199,124,.45) }
-    .btn.primary:hover{ border-color: rgba(255,199,124,.7) }
 
-    /* Socials */
-    .socials{ display:flex; gap:26px; margin-top: clamp(16px, 2.4vw, 28px) }
-    .socials a{
+    /* Footer */
+    footer{ margin-top: clamp(16px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
+    .social{
       display:inline-flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:10px;
-      color:var(--copy); text-decoration:none;
+      width:32px; height:32px; border-radius:10px;
+      color:var(--ink); text-decoration:none;
       border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
       transition: border-color .2s ease, background .2s ease, transform .06s ease;
     }
-    .socials a:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
-    .socials svg{ width:18px; height:18px; fill: currentColor }
+    .social:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
+    .social svg{ width:18px; height:18px; fill: currentColor }
+    .copyright{ width:100%; text-align:center; margin-top:6px; font-size:12px; color:#88939c }
 
     /* Modal */
     .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
       display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
     .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(900px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
+    .modal-sheet{ width: min(980px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
       overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
     .modal iframe{ width:100%; height:100%; border:0; display:block }
 
-    .reveal{ animation: reveal .9s ease both }
-    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
+    @media (prefers-reduced-motion: reduce){
+      .tunnel-3d{ animation:none !important; transform:none !important; transition:none !important }
+      .logo::after{ animation:none !important }
+    }
 
-    svg#fx{ position:absolute; width:0; height:0; overflow:hidden }
+    .reveal{ animation: reveal .8s ease both }
+    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
   </style>
 </head>
 <body>
-  <!-- Filter for the electric border -->
-  <svg id="fx" aria-hidden="true" focusable="false">
-    <defs>
-      <filter id="turbulent-displace" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="noise1"/>
-        <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1"><animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="1" result="noise2"/>
-        <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2"><animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="noise3"/>
-        <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3"><animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" seed="2" result="noise4"/>
-        <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4"><animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear"/></feOffset>
-        <feComposite in="offsetNoise1" in2="offsetNoise2" operator="arithmetic" k2="1" k3="1" result="part1"/>
-        <feComposite in="offsetNoise3" in2="offsetNoise4" operator="arithmetic" k2="1" k3="1" result="part2"/>
-        <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise"/>
-        <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B"/>
-      </filter>
-    </defs>
-  </svg>
-
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
-      <div class="hero">
-        <img class="logo-emblem"
-             src="Transparent Logo.svg"
-             alt="SOLV logo"
-             fetchpriority="high"
-             decoding="async"
-             width="512" height="512" />
-
-        <p class="tagline">Making autonomous AI insurable at inference speed.</p>
-
-        <div class="actions" role="group" aria-label="Primary actions">
-          <a class="btn primary" href="mailto:patrick@solvrisk.xyz">Get In Touch</a>
-          <a class="btn primary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal">Learn More</a>
+      <!-- TUNNEL (behind hero) -->
+      <div class="tunnel" aria-hidden="true">
+        <div class="tunnel-3d" id="tunnel3d">
+          <!-- 16 rings -->
+          <div class="ring" style="--i:1"></div>
+          <div class="ring" style="--i:2"></div>
+          <div class="ring" style="--i:3"></div>
+          <div class="ring" style="--i:4"></div>
+          <div class="ring" style="--i:5"></div>
+          <div class="ring" style="--i:6"></div>
+          <div class="ring" style="--i:7"></div>
+          <div class="ring" style="--i:8"></div>
+          <div class="ring" style="--i:9"></div>
+          <div class="ring" style="--i:10"></div>
+          <div class="ring" style="--i:11"></div>
+          <div class="ring" style="--i:12"></div>
+          <div class="ring" style="--i:13"></div>
+          <div class="ring" style="--i:14"></div>
+          <div class="ring" style="--i:15"></div>
+          <div class="ring" style="--i:16"></div>
         </div>
+      </div>
 
-        <nav class="socials" aria-label="Social links">
-          <a href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
-          </a>
-          <a href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
-          </a>
-        </nav>
+      <!-- HERO CONTENT -->
+      <div class="hero-box" id="heroBox">
+        <div class="hero">
+          <img class="logo" src="Transparent Logo.svg" alt="SOLV lion logo"/>
+
+          <h1>Make autonomous AI insurable — with runtime evidence.</h1>
+          <p class="subhead">Continuous observability, policy checks, and claims-grade logs — generated at inference time.</p>
+
+          <div class="actions" role="group" aria-label="Primary actions">
+            <a class="btn"
+               href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
+               aria-label="Talk to Solv by email">Talk to Solv</a>
+            <a class="btn" href="#" id="whyBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv? Video">Why Solv?</a>
+          </div>
+
+          <footer>
+            <a class="social" href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
+            </a>
+            <a class="social" href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
+            </a>
+            <div class="copyright">© Solv</div>
+          </footer>
+        </div>
       </div>
     </section>
   </main>
 
   <!-- Video modal -->
-  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Product video">
+  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Why Solv video">
     <div class="modal-sheet" data-modal-sheet>
       <iframe
         id="ytFrame"
-        title="SOLV — Learn more"
+        title="SOLV — Why Solv?"
         allow="autoplay; encrypted-media; picture-in-picture"
         allowfullscreen
         referrerpolicy="strict-origin-when-cross-origin">
@@ -200,31 +263,51 @@
   </div>
 
   <script>
-  (() => {
-    const modal = document.getElementById('videoModal');
-    const sheet = modal.querySelector('[data-modal-sheet]');
-    const openBtn = document.getElementById('learnMoreBtn');
-    const frame = document.getElementById('ytFrame');
-    const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+    // Parallax tilt (capped), motion-respecting
+    (function(){
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      const hero = document.getElementById('heroBox');
+      const root = document.documentElement;
 
-    function openModal(){
-      frame.src = YT_URL;
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      sheet.focus?.();
-    }
-    function closeModal(){
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
-      frame.src = "";
-      openBtn.focus?.();
-    }
+      function setMouse(e){
+        const r = hero.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        root.style.setProperty('--mouseX', (x*2 - 1).toFixed(3));
+        root.style.setProperty('--mouseY', (y*2 - 1).toFixed(3));
+      }
+      hero.addEventListener('mousemove', setMouse);
+      hero.addEventListener('mouseleave', ()=> {
+        root.style.setProperty('--mouseX', 0);
+        root.style.setProperty('--mouseY', 0);
+      });
+    })();
 
-    openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-    modal.addEventListener('click', closeModal);           // click outside closes
-    sheet.addEventListener('click', e => e.stopPropagation());
-    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
-  })();
+    // Modal open/close + 720p hint
+    (function(){
+      const modal = document.getElementById('videoModal');
+      const sheet = modal.querySelector('[data-modal-sheet]');
+      const openBtn = document.getElementById('whyBtn');
+      const frame = document.getElementById('ytFrame');
+      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
+
+      function openModal(){
+        frame.src = YT_URL;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden','false');
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden','true');
+        frame.src = "";
+        openBtn?.focus();
+      }
+      openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      modal.addEventListener('click', closeModal);
+      sheet.addEventListener('click', e => e.stopPropagation());
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    })();
   </script>
 </body>
 </html>
