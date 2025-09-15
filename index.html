@@ -20,11 +20,19 @@
       --muted:#aeb6bd;
       --btn-bg:#191b1e;
       --btn-bg-hover:#202328;
-      --accent: #c38d53; /* bronze */
+
+      /* bronze family */
+      --accent:  #c38d53; /* bronze */
       --accent-2:#e0a357; /* gold */
-      --accent-3:#a96f3b; /* deep bronze */
-      --tunnel-frames: 22;
-      --max-rotation: 24deg; /* a touch calmer */
+
+      /* tunnel controls */
+      --tunnel-frames: 24;
+      --depth-step: 40px;
+      --max-rotation: 22deg;
+
+      /* warm hue sweep (oklch hue angles) */
+      --hBase: 54;   /* yellow-gold */
+      --hStep: -1.2; /* step toward copper/bronze through depth */
     }
 
     /* Base */
@@ -43,7 +51,7 @@
     .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
     .frame{
       position:relative;
-      width:min(1120px, 94vw);
+      width:min(1160px, 95vw);
       padding: clamp(28px, 4vw, 44px);
       border-radius:20px;
       background: linear-gradient(#101112, #0f1011);
@@ -52,51 +60,63 @@
       isolation:isolate;
     }
 
-    /* Bronze tunnel (surrounds the content) */
+    /* Tunnel that surrounds the content */
     .tunnel-wrapper{
       position:absolute; inset:16px; pointer-events:none; display:grid; place-items:center;
       border-radius:14px;
     }
     .tunnel-container{
       perspective: 900px; transform-style: preserve-3d;
-      position:relative; width: min(100%, 980px); height:min(68vh, 680px);
+      position:relative; width: 100%; height:min(72vh, 720px);
       transform: rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
                  rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
       transition: transform .5s ease-out, filter .2s ease;
       filter: drop-shadow(0 10px 28px rgba(0,0,0,.45));
     }
     .tunnel-frame{
-      position:absolute; inset:0; border-radius:26px;
-      --i: 1; /* will be set inline; kept for fallback */
-      --hueA: 36;  /* orange */
-      --hueB: 44;  /* gold */
-      --cA: oklch(72% 0.14 var(--hueA));
-      --cB: oklch(72% 0.12 var(--hueB));
+      position:absolute; inset:0; border-radius:28px;
+      --i: 1; /* set inline on each frame */
+      /* compute warm hues per frame */
+      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep));   /* from ~54→~26 */
+      --hB: calc(var(--hA) - 8);                                  /* second stop slightly warmer */
+      /* luminous warm gradient */
       border: 8px solid;
-      border-image-source: linear-gradient(45deg, var(--cA), var(--cB));
       border-image-slice: 1;
-      /* subtle, warm glow */
+      border-image-source:
+        linear-gradient(
+          45deg,
+          oklch(72% 0.16 var(--hA)),
+          oklch(70% 0.14 var(--hB))
+        );
+      /* subtle warm glow */
       box-shadow:
-        0 0 18px oklch(70% 0.12 var(--hueB)/.35),
-        0 0 54px oklch(70% 0.14 var(--hueA)/.25);
-      opacity: calc(1.06 - (var(--i) / var(--tunnel-frames)));
-      transform: translateZ(calc(-40px * (var(--i) - 1)));
+        0 0 18px oklch(70% 0.14 var(--hA) / .36),
+        0 0 52px oklch(68% 0.12 var(--hB) / .22);
+      opacity: calc(1.05 - (var(--i) / var(--tunnel-frames)));
+      transform: translateZ(calc(-1 * var(--depth-step) * (var(--i) - 1)));
+    }
+    @supports not (color: oklch(50% 0 0)){
+      .tunnel-frame{
+        border-image-source: linear-gradient(45deg, #e9b66b, #c27c3a);
+      }
     }
     @media (prefers-reduced-motion: reduce){
       .tunnel-container{ transform:none !important; transition:none }
     }
 
-    /* Shadowed center to aid copy legibility */
+    /* Dark center so lion/text stay on black */
     .copy-veil{
       position:absolute; inset:0; pointer-events:none;
-      background: radial-gradient(40% 34% at 50% 60%, rgba(0,0,0,.28), transparent 65%);
+      background:
+        radial-gradient(42% 32% at 50% 38%, rgba(0,0,0,.46), rgba(0,0,0,.22) 45%, transparent 72%),
+        radial-gradient(64% 60% at 50% 60%, rgba(0,0,0,.28), transparent 70%);
       z-index:1;
     }
 
     /* Hero */
     .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap: clamp(16px, 2.4vw, 24px); text-align:center }
     .logo-emblem{
-      width: clamp(260px, 30vw, 380px); /* ~+30% */
+      width: clamp(260px, 30vw, 380px);
       height:auto; display:block; user-select:none;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
     }
@@ -126,16 +146,14 @@
     }
     .btn:hover{ background: var(--btn-bg-hover); border-color: rgba(255,255,255,.18) }
     .btn:active{ transform: translateY(1px) }
-    .btn.primary{ border-color: rgba(224,163,87,.55); padding:0 26px } /* slightly wider */
+    .btn.primary{ border-color: rgba(224,163,87,.55); padding:0 26px }
     .btn.primary:hover{ border-color: rgba(224,163,87,.8) }
     .btn.secondary{ border-color: rgba(255,255,255,.12) }
 
-    .reassure{
-      margin-top:8px; font-size:12px; color:var(--muted);
-    }
+    .reassure{ margin-top:8px; font-size:12px; color:var(--muted); }
 
-    /* Footer socials */
-    footer{ margin-top: clamp(14px, 2.4vw, 28px); display:flex; gap:16px; align-items:center; justify-content:center }
+    /* Footer */
+    footer{ margin-top: clamp(14px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
     .social{
       display:inline-flex; align-items:center; justify-content:center;
       width:32px; height:32px; border-radius:10px;
@@ -145,7 +163,7 @@
     }
     .social:hover{ border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05) }
     .social svg{ width:18px; height:18px; fill: currentColor }
-    .tiny{ font-size:12px; color:#88939c; margin-left:8px }
+    .copyright{ width:100%; text-align:center; margin-top:6px; font-size:12px; color:#88939c }
 
     /* Modal */
     .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
@@ -162,11 +180,11 @@
 <body>
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
-      <!-- Bronze tunnel (behind content) -->
+      <!-- Warm multi-color tunnel -->
       <div class="tunnel-wrapper" aria-hidden="true">
         <div class="tunnel-container" id="tunnel">
-          <!-- frames are duplicated for depth -->
-          <!-- 22 frames -->
+          <!-- 24 frames -->
+          <!-- (Each frame sets --i; hues are computed from --hBase/--hStep) -->
           <div class="tunnel-frame" style="--i:1"></div>
           <div class="tunnel-frame" style="--i:2"></div>
           <div class="tunnel-frame" style="--i:3"></div>
@@ -189,8 +207,12 @@
           <div class="tunnel-frame" style="--i:20"></div>
           <div class="tunnel-frame" style="--i:21"></div>
           <div class="tunnel-frame" style="--i:22"></div>
+          <div class="tunnel-frame" style="--i:23"></div>
+          <div class="tunnel-frame" style="--i:24"></div>
         </div>
       </div>
+
+      <!-- Keeps lion/text on black -->
       <div class="copy-veil"></div>
 
       <div class="hero">
@@ -204,15 +226,15 @@
         <!-- Actions -->
         <div class="actions" role="group" aria-label="Primary actions">
           <a class="btn primary"
-             href="mailto:patrick@solvrisk.xyz?subject=Insurability%20Assessment&body=Hi%20SOLV%20team%2C%20I%E2%80%99d%20like%20an%20insurability%20assessment%20for%20our%20AI.%20We%20use%3A%20_____%0AKey%20risks%20we%E2%80%99re%20concerned%20about%3A%20_____%0AThanks!"
-             aria-label="Request an insurability assessment by email">
-             Get Insurability Assessment
+             href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
+             aria-label="Talk to Solv by email">
+             Talk to Solv
           </a>
-          <a class="btn secondary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Watch a 2 minute product video">Watch 2-min demo</a>
+          <a class="btn secondary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Watch a 2 minute product video">Learn more</a>
         </div>
-        <div class="reassure">Free, 2 minutes. No code.</div>
+        <div class="reassure">Fast intro. No code required.</div>
 
-        <!-- Footer: socials & © -->
+        <!-- Footer: socials + centered copyright -->
         <footer>
           <a class="social" href="https://www.linkedin.com/company/solvxyz/" aria-label="LinkedIn" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zm7.5 0h3.8v2h.05c.53-1 1.84-2.05 3.8-2.05 4.06 0 4.81 2.67 4.81 6.14V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.17 0-2.5 1.69-2.5 3.44V23h-4V8.5z"/></svg>
@@ -220,7 +242,7 @@
           <a class="social" href="https://x.com/solvlabs" aria-label="X (formerly Twitter)" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.54 7.47L22.5 22h-6.74l-5.27-6.83L3.5 22H1l7.16-8.18L1.5 2h6.89l4.77 6.25L18.244 2Zm-2.36 18h1.88L8.21 4h-1.9l9.564 16Z"/></svg>
           </a>
-          <span class="tiny">© SOLV</span>
+          <div class="copyright">© Solv</div>
         </footer>
       </div>
     </section>
@@ -240,7 +262,7 @@
   </div>
 
   <script>
-    // --- Tunnel interactivity (mouse tilt), respectful of reduced-motion
+    /* Tunnel tilt (respect reduced motion) */
     (function(){
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
@@ -262,7 +284,7 @@
       });
     })();
 
-    // --- Modal (click outside closes)
+    /* Modal (click outside closes) + 720p hint */
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
@@ -283,7 +305,7 @@
         openBtn.focus?.();
       }
       openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-      modal.addEventListener('click', closeModal);           // click outside closes
+      modal.addEventListener('click', closeModal);
       sheet.addEventListener('click', e => e.stopPropagation());
       window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     })();
