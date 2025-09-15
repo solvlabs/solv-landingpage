@@ -227,7 +227,12 @@
             <a class="btn primary"
                href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
                aria-label="Talk to Solv by email">Talk to Solv</a>
-            <a class="btn secondary" href="#" id="learnMoreBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv? Watch a brief explainer">Why Solv?</a>
+            <a class="btn secondary" href="#"
+               id="learnMoreBtn"
+               role="button"
+               aria-haspopup="dialog"
+               aria-controls="videoModal"
+               aria-label="Why Solv? Watch a brief explainer">Why Solv?</a>
           </div>
 
           <footer>
@@ -284,7 +289,7 @@
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
-      const openBtn = document.getElementById('learnMoreBtn'); // id kept for JS
+      const openBtn = document.getElementById('learnMoreBtn'); // same id, new label/text
       const frame = document.getElementById('ytFrame');
       const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
