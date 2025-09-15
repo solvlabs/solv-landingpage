@@ -7,6 +7,7 @@
 
   <!-- SEO -->
   <meta name="description" content="SOLV provides runtime observability, policy enforcement, and claims-grade evidence so insurers can price autonomous AI. Real-time, inference-speed proofs for safety and accountability.">
+  <link rel="canonical" href="https://solvrisk.xyz/">
 
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,24 +16,22 @@
 
   <style>
     :root{
+      /* Theme */
       --bg: #0e0f10;
       --copy: #e9edf0;
       --muted:#aeb6bd;
       --btn-bg:#191b1e;
       --btn-bg-hover:#202328;
+      --gold: #e0a357;
 
-      /* bronze family */
-      --accent:  #c38d53; /* bronze */
-      --accent-2:#e0a357; /* gold */
-
-      /* tunnel controls */
+      /* Tunnel controls (JS can read these) */
       --tunnel-frames: 24;
       --depth-step: 38px;
       --max-rotation: 18deg;
 
-      /* warm hue sweep (oklch hue angles) */
-      --hBase: 56;    /* yellow-gold start */
-      --hStep: -1.15; /* trends to copper/bronze */
+      /* Initial subtle tilt so it feels 3D even before mouse input */
+      --mouseX: -0.18;
+      --mouseY:  0.14;
     }
 
     /* Base */
@@ -40,8 +39,11 @@
     html,body{ height:100% }
     body{
       margin:0;
+      color-scheme: dark;
       font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1100px 700px at 50% 28%, #151719, var(--bg) 68%);
+      background-color: var(--bg); /* solid fallback to prevent white flashes */
+      background-image: radial-gradient(1100px 700px at 50% 28%, #151719 0%, var(--bg) 68%);
+      background-repeat: no-repeat;
       color:var(--copy);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
@@ -68,55 +70,63 @@
       border-radius:22px;
       background: #0c0d0f; /* solid dark center behind content */
       padding: clamp(42px, 6vw, 72px) clamp(28px, 4.5vw, 56px) clamp(48px, 6.5vw, 84px);
-      /* gentle glow to lift the inner card */
       box-shadow: 0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
       overflow:visible;
     }
 
-    /* Tunnel wrapper is absolutely positioned to the hero-box.
-       We expand it OUTWARD with a negative inset so frames sit
-       OUTSIDE the content rectangle (no clipping of the lion). */
+    /* Tunnel sits around the hero-box, expanded outward so it never covers content */
     .tunnel-wrapper{
       position:absolute;
-      inset: -34px;            /* expand tunnel beyond hero-box edges */
+      inset: -34px;                  /* expand tunnel beyond hero edges */
       pointer-events:none;
       border-radius: calc(22px + 34px);
+      z-index: 1;
       display:grid; place-items:center;
-      z-index:1;
     }
     .tunnel-container{
-      perspective: 900px; transform-style: preserve-3d;
-      position:relative; width:100%; height:100%;
-      transform: rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
-                 rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
-      transition: transform .45s ease-out, filter .2s ease;
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      position:relative;
+      width:100%; height:100%;
+
+      /* GPU compositor hints */
+      will-change: transform;
+      transform: translateZ(0)
+        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+      transition: transform .45s ease-out;
       filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
     }
+
+    /* Each tunnel frame gets its own gradient ring and glow.
+       We use a robust "background + mask" approach for borders
+       (works great across browsers—even with border-radius). */
     .tunnel-frame{
       position:absolute;
-      /* small inset keeps the lines near the outer edge,
-         leaving a large clean black center for content */
       inset: clamp(8px, 1vw, 14px);
       border-radius: 28px;
-      --i: 1; /* set inline per frame */
-      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep));
-      --hB: calc(var(--hA) - 10);
-      border: 8px solid;
-      border-image-slice: 1;
-      border-image-source:
-        linear-gradient(45deg, oklch(72% 0.16 var(--hA)), oklch(68% 0.12 var(--hB)));
-      box-shadow:
-        0 0 18px oklch(70% 0.14 var(--hA) / .36),
-        0 0 52px oklch(68% 0.12 var(--hB) / .22);
-      opacity: calc(1.02 - (var(--i) / var(--tunnel-frames)));
-      transform: translateZ(calc(-1 * var(--depth-step) * (var(--i) - 1)));
-    }
-    @supports not (color: oklch(50% 0 0)){
-      .tunnel-frame{ border-image-source: linear-gradient(45deg, #f1c36a, #c67934) }
+
+      /* colors injected via JS per-frame: --c1, --c2, --glow */
+      background:
+        linear-gradient(#000 0 0) padding-box,         /* keep center black */
+        linear-gradient(45deg, var(--c1,#c48b4a), var(--c2,#8d5726)) border-box;
+      border: 8px solid transparent;                   /* let the gradient show on border-box */
+      box-shadow: 0 0 18px var(--glow, rgba(226,158,88,.32)),
+                  0 0 52px var(--glow, rgba(226,158,88,.18));
+      opacity: var(--alpha, 1);
+
+      transform: translateZ(var(--z, 0));
+      will-change: transform, opacity;
     }
 
-    /* Hero content sits ABOVE the tunnel (z-index:2) */
-    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap: clamp(16px, 2.4vw, 24px); text-align:center }
+    /* Foreground content sits above the tunnel */
+    .hero{
+      position:relative;
+      z-index:2;
+      display:flex; flex-direction:column;
+      align-items:center; text-align:center;
+      gap: clamp(16px, 2.4vw, 24px);
+    }
     .logo-emblem{
       width: clamp(260px, 30vw, 380px);
       height:auto; display:block; user-select:none;
@@ -125,7 +135,7 @@
     h1{
       margin: 6px 0 0; font-weight:700;
       font-size: clamp(24px, 2.4vw, 34px); line-height:1.25;
-      text-wrap:balance;
+      text-wrap: balance;
       max-width:min(34ch, 92%);
     }
     .subhead{
@@ -176,8 +186,15 @@
     .reveal{ animation: reveal .9s ease both }
     @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
 
+    /* Accessibility/motion preferences */
     @media (prefers-reduced-motion: reduce){
       .tunnel-container{ transform:none !important; transition:none }
+    }
+
+    /* Mobile performance guardrails */
+    @media (max-width: 680px){
+      :root{ --depth-step: 30px }
+      .tunnel-frame{ inset: 6px; border-width: 6px }
     }
   </style>
 </head>
@@ -187,33 +204,7 @@
       <div class="hero-box" id="heroBox">
         <!-- Tunnel sits behind and OUTSIDE this hero-box -->
         <div class="tunnel-wrapper" aria-hidden="true">
-          <div class="tunnel-container">
-            <!-- 24 frames -->
-            <div class="tunnel-frame" style="--i:1"></div>
-            <div class="tunnel-frame" style="--i:2"></div>
-            <div class="tunnel-frame" style="--i:3"></div>
-            <div class="tunnel-frame" style="--i:4"></div>
-            <div class="tunnel-frame" style="--i:5"></div>
-            <div class="tunnel-frame" style="--i:6"></div>
-            <div class="tunnel-frame" style="--i:7"></div>
-            <div class="tunnel-frame" style="--i:8"></div>
-            <div class="tunnel-frame" style="--i:9"></div>
-            <div class="tunnel-frame" style="--i:10"></div>
-            <div class="tunnel-frame" style="--i:11"></div>
-            <div class="tunnel-frame" style="--i:12"></div>
-            <div class="tunnel-frame" style="--i:13"></div>
-            <div class="tunnel-frame" style="--i:14"></div>
-            <div class="tunnel-frame" style="--i:15"></div>
-            <div class="tunnel-frame" style="--i:16"></div>
-            <div class="tunnel-frame" style="--i:17"></div>
-            <div class="tunnel-frame" style="--i:18"></div>
-            <div class="tunnel-frame" style="--i:19"></div>
-            <div class="tunnel-frame" style="--i:20"></div>
-            <div class="tunnel-frame" style="--i:21"></div>
-            <div class="tunnel-frame" style="--i:22"></div>
-            <div class="tunnel-frame" style="--i:23"></div>
-            <div class="tunnel-frame" style="--i:24"></div>
-          </div>
+          <div class="tunnel-container" id="tunnel"></div>
         </div>
 
         <!-- Foreground content -->
@@ -227,7 +218,8 @@
             <a class="btn primary"
                href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
                aria-label="Talk to Solv by email">Talk to Solv</a>
-            <a class="btn secondary" href="#"
+            <a class="btn secondary"
+               href="#"
                id="learnMoreBtn"
                role="button"
                aria-haspopup="dialog"
@@ -263,33 +255,93 @@
   </div>
 
   <script>
-    /* Mouse tilt on the hero-box (respect reduced motion) */
+    /* -----------------------------
+       3D TUNNEL (compatibility-first)
+       ----------------------------- */
     (function(){
+      const root = document.documentElement;
+      const container = document.getElementById('tunnel');
+
+      const FRAMES = parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24;
+      const DEPTH = parseFloat(getComputedStyle(root).getPropertyValue('--depth-step')) || 38;
+
+      // Bronze-family hues (HSL): yellow → gold → orange → copper → bronze
+      const hues = [48, 42, 30, 22, 16];  // degrees
+      const sat1 = 80, light1 = 60;       // bright ring color
+      const sat2 = 70, light2 = 50;       // deeper ring color
+
+      const lerp = (a,b,t)=> a + (b-a)*t;
+
+      // Generate frames
+      const frag = document.createDocumentFragment();
+      for (let i=0; i<FRAMES; i++){
+        const t = (FRAMES<=1) ? 0 : i/(FRAMES-1);
+        const segPos = t * (hues.length - 1);
+        const seg = Math.min(hues.length - 2, Math.floor(segPos));
+        const lt = segPos - seg;
+
+        const h = lerp(hues[seg], hues[seg+1], lt);
+        const h2 = h - 8;
+
+        const c1 = `hsl(${h} ${sat1}% ${light1}%)`;
+        const c2 = `hsl(${h2} ${sat2}% ${light2}%)`;
+        const glow = `hsla(${h}, 75%, 58%, 0.28)`;
+
+        const d = -1 * DEPTH * i;
+        const alpha = 1.02 - (i / FRAMES); // gentle fade with depth
+
+        const f = document.createElement('div');
+        f.className = 'tunnel-frame';
+        f.style.setProperty('--c1', c1);
+        f.style.setProperty('--c2', c2);
+        f.style.setProperty('--glow', glow);
+        f.style.setProperty('--z', d + 'px');
+        f.style.setProperty('--alpha', alpha.toFixed(3));
+        frag.appendChild(f);
+      }
+      container.appendChild(frag);
+
+      // Pointer tilt (smoothed with rAF)
+      const heroBox = document.getElementById('heroBox');
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
 
-      const box = document.getElementById('heroBox');
-      const root = document.documentElement;
+      let targetX = parseFloat(getComputedStyle(root).getPropertyValue('--mouseX')) || -0.18;
+      let targetY = parseFloat(getComputedStyle(root).getPropertyValue('--mouseY')) ||  0.14;
+      let curX = targetX, curY = targetY;
 
-      function setMouse(e){
-        const r = box.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;   // 0..1
-        const y = (e.clientY - r.top) / r.height;   // 0..1
-        root.style.setProperty('--mouseX', (x * 2 - 1).toFixed(3));
-        root.style.setProperty('--mouseY', (y * 2 - 1).toFixed(3));
+      function onMove(e){
+        const r = heroBox.getBoundingClientRect();
+        const mx = ((e.clientX - r.left) / r.width) * 2 - 1;  // -1..1
+        const my = ((e.clientY - r.top)  / r.height) * 2 - 1; // -1..1
+        targetX = mx;
+        targetY = my;
       }
-      box.addEventListener('mousemove', setMouse);
-      box.addEventListener('mouseleave', ()=> {
-        root.style.setProperty('--mouseX', 0);
-        root.style.setProperty('--mouseY', 0);
-      });
+      function onLeave(){
+        targetX = -0.18;
+        targetY =  0.14;
+      }
+      heroBox.addEventListener('mousemove', onMove);
+      heroBox.addEventListener('mouseleave', onLeave);
+
+      function tick(){
+        // ease toward target
+        curX += (targetX - curX) * 0.08;
+        curY += (targetY - curY) * 0.08;
+        root.style.setProperty('--mouseX', curX.toFixed(3));
+        root.style.setProperty('--mouseY', curY.toFixed(3));
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
     })();
 
-    /* Modal (click outside closes) + 720p hint */
+    /* -----------------------------
+       Modal (click-outside closes)
+       ----------------------------- */
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
-      const openBtn = document.getElementById('learnMoreBtn'); // same id, new label/text
+      const openBtn = document.getElementById('learnMoreBtn');
       const frame = document.getElementById('ytFrame');
       const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
