@@ -4,17 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solv | Insuring Autonomous AI</title>
+  <meta name="description" content="Solv makes autonomous AI insurable at inference speed with runtime trust, real-time risk scoring, and enforcement.">
 
-  <!-- SEO -->
-  <meta name="description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
-  <link rel="canonical" href="https://solvrisk.xyz/">
-  <meta property="og:title" content="Solv | Insuring Autonomous AI">
-  <meta property="og:description" content="Runtime observability, zero-trust enforcement, and insurance that prices off your AI’s live safety signals—so you can ship agentic systems with guardrails and coverage.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://solvrisk.xyz/">
-  <meta name="twitter:card" content="summary_large_image">
-
-  <!-- Font -->
+  <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,11 +19,16 @@
       --btn-bg-hover: #202328;
       --accent: #c38d53; /* bronze */
 
-      /* Tunnel controls (brand-leaning: gold/bronze spectrum) */
-      --frame-depth: 40px;     /* Z spacing between frames */
-      --max-rotation: 30deg;   /* mouse tilt */
-      --base-hue: 70;          /* ~gold in OKLCH */
-      --hue-step: 8;           /* subtle hue shift per frame */
+      /* Shared padding so the tunnel hugs the content area */
+      --stage-pad: clamp(28px, 4vw, 44px);
+
+      /* Tunnel controls (warm-only palette) */
+      --mouseX: 0;
+      --mouseY: 0;
+      --frame-depth: 50px;
+      --max-rotation: 28deg;
+      --base-hue: 50;   /* bronze/orange start (warm) */
+      --hue-step: 2;    /* tiny step so we stay bronze→gold */
     }
 
     /* Base */
@@ -48,74 +45,77 @@
 
     /* Layout */
     .wrap{ min-height:100dvh; display:grid; place-items:center; padding:4rem 1.25rem }
-    .frame{
+    .stage{
       position:relative;
       width:min(1120px, 92vw);
-      padding: clamp(28px, 4vw, 44px);
       border-radius:20px;
-      background: linear-gradient(#101112, #0f1011);
+      padding: var(--stage-pad);
+      background:
+        radial-gradient(110% 70% at 50% 0%, rgba(255,196,128,.06), transparent 60%),
+        linear-gradient(#101112, #0f1011);
       box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
+      overflow:hidden;
       isolation:isolate;
-      overflow:hidden; /* contain the tunnel */
     }
 
-    /* =======================
-       Interactive 3D Tunnel
-       ======================= */
-    .tunnel-wrapper-interactive{
-      position:absolute; inset:0;
-      display:grid; place-items:center;
+    /* --- Tunnel (warm palette, full-size) --- */
+    .tunnel-wrapper-interactive {
+      position:absolute;
+      inset: var(--stage-pad);          /* align with content edges */
+      display:grid;
+      place-items:center;
       overflow:hidden;
-      border-radius: inherit;
-      z-index:0;
-      /* Let clicks reach the hero content; we listen on .frame for mousemove */
-      pointer-events:none;
+      border-radius: 16px;
+      pointer-events:none;              /* decorative only */
     }
-    .tunnel-container-interactive{
-      perspective: 800px;
+    .tunnel-container-interactive {
+      perspective: 1000px;
       transform-style: preserve-3d;
       position: relative;
-      width: min(520px, 70%);
-      height: min(520px, 70%);
-      margin:auto;
-      /* transform controlled by CSS vars set from JS */
+      width: 100%;
+      height: 100%;
       transform:
-        rotateX(calc(var(--mouseY, 0) * var(--max-rotation) * -1))
-        rotateY(calc(var(--mouseX, 0) * var(--max-rotation)));
+        rotateX(calc(var(--mouseY) * var(--max-rotation) * -1))
+        rotateY(calc(var(--mouseX) * var(--max-rotation)));
       transition: transform 0.5s ease-out;
-      filter: blur(.15px);
-      opacity:.92;
+      filter: drop-shadow(0 18px 48px rgba(0,0,0,.45));
     }
-    .tunnel-frame-interactive{
-      position:absolute; inset:0;
+    .tunnel-frame-interactive {
+      position:absolute;
+      inset:0;
+
+      /* Keep hues in a warm band only */
+      --frame-hue: calc(var(--base-hue) + (sibling-index() - 1) * var(--hue-step));
+
+      /* Warm gradient (bronze→gold) using nearby hue */
+      --tunnel-gradient: linear-gradient(
+        35deg,
+        oklch(78% 0.16 var(--frame-hue)),
+        oklch(72% 0.20 calc(var(--frame-hue) + 8))
+      );
+
       border: 6px solid;
-      border-radius: 26px;
-      /* The gradient, glow, depth, and alpha get set per-frame via JS custom props */
-      border-image-source: var(--tunnel-gradient, linear-gradient(45deg, oklch(70% .25 70), oklch(70% .25 115)));
+      border-image-source: var(--tunnel-gradient);
       border-image-slice: 1;
-      box-shadow: 0 0 28px var(--tunnel-glow, oklch(70% .25 70 / .45));
-      transform: translateZ(var(--z, 0px));
-      opacity: var(--alpha, 1);
-    }
-    @media (max-width: 640px){
-      .tunnel-container-interactive{ width:min(420px, 82%); height:min(420px, 82%) }
-      .tunnel-frame-interactive{ border-width:5px; border-radius:22px }
-    }
-    @media (prefers-reduced-motion: reduce){
-      .tunnel-container-interactive{ transition:none }
+      border-radius: 24px;
+
+      /* Warm glow that matches the frame color */
+      box-shadow:
+        0 0 20px oklch(76% 0.18 var(--frame-hue) / 0.45),
+        0 0 40px oklch(76% 0.18 var(--frame-hue) / 0.25);
+
+      transform: translateZ(calc(-1 * var(--frame-depth) * (sibling-index() - 1)));
+      opacity: calc(1.06 - (sibling-index() / sibling-count()));
     }
 
-    /* Hero (sits above the tunnel) */
-    .hero{
-      position:relative; z-index:1;
-      display:flex; flex-direction:column; align-items:center; text-align:center;
-      gap: clamp(18px, 2.6vw, 28px)
-    }
+    /* Content */
+    .hero{ position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(18px, 2.6vw, 28px) }
     .logo-emblem{
       width: clamp(200px, 26vw, 320px);
       height:auto; display:block;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       user-select:none;
+      position:relative; z-index:2;
     }
     .tagline{
       margin: 6px 0 0;
@@ -124,8 +124,10 @@
       line-height:1.35;
       text-wrap:balance;
       max-width:min(78ch, 90%);
+      position:relative; z-index:2;
     }
-    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2.2vw, 24px); flex-wrap:wrap; justify-content:center }
+
+    .actions{ display:flex; gap:14px; margin-top: clamp(16px, 2.2vw, 24px); flex-wrap:wrap; justify-content:center; position:relative; z-index:2 }
     .btn{
       display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
       height:48px; padding:0 22px; border-radius:12px;
@@ -141,8 +143,7 @@
     .btn.primary{ border-color: rgba(255,199,124,.45) }
     .btn.primary:hover{ border-color: rgba(255,199,124,.7) }
 
-    /* Socials */
-    .socials{ display:flex; gap:26px; margin-top: clamp(16px, 2.4vw, 28px) }
+    .socials{ display:flex; gap:26px; margin-top: clamp(16px, 2.4vw, 28px); position:relative; z-index:2 }
     .socials a{
       display:inline-flex; align-items:center; justify-content:center;
       width:34px; height:34px; border-radius:10px;
@@ -166,22 +167,31 @@
   </style>
 </head>
 <body>
+
   <main class="wrap">
-    <section class="frame reveal" aria-label="SOLV hero">
-      <!-- Tunnel background -->
-      <div class="tunnel-wrapper-interactive" aria-hidden="true">
-        <div class="tunnel-container-interactive" id="tunnel"></div>
+    <section class="stage reveal" aria-label="SOLV hero">
+      <!-- Warm tunnel underlay filling the inner area -->
+      <div class="tunnel-wrapper-interactive" id="tunnel">
+        <div class="tunnel-container-interactive">
+          <!-- deeper stack so large tunnel still feels dimensional -->
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+          <div class="tunnel-frame-interactive"></div>
+        </div>
       </div>
 
       <!-- Foreground content -->
       <div class="hero">
-        <img class="logo-emblem"
-             src="Transparent Logo.svg"
-             alt="SOLV logo"
-             fetchpriority="high"
-             decoding="async"
-             width="512" height="512" />
-
+        <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
         <p class="tagline">Making autonomous AI insurable at inference speed.</p>
 
         <div class="actions" role="group" aria-label="Primary actions">
@@ -215,85 +225,53 @@
   </div>
 
   <script>
-  /* Modal (unchanged) */
-  (() => {
-    const modal = document.getElementById('videoModal');
-    const sheet = modal.querySelector('[data-modal-sheet]');
-    const openBtn = document.getElementById('learnMoreBtn');
-    const frame = document.getElementById('ytFrame');
-    const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+    // mouse tracking on the CARD (so underlay can stay pointer-events:none)
+    (function () {
+      const stage = document.querySelector(".stage");
 
-    function openModal(){
-      frame.src = YT_URL;
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      sheet.focus?.();
-    }
-    function closeModal(){
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
-      frame.src = "";
-      openBtn.focus?.();
-    }
-    openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-    modal.addEventListener('click', closeModal);
-    sheet.addEventListener('click', e => e.stopPropagation());
-    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
-  })();
+      stage.addEventListener("mousemove", (e) => {
+        const rect = stage.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-  /* Interactive 3D Tunnel
-     Adapted from your CodePen CSS/JS. We avoid experimental `sibling-index()` by setting
-     per-frame properties via JS so this works across browsers. */
-  (() => {
-    const card = document.querySelector('.frame');       // listen here so clicks pass through
-    const container = document.getElementById('tunnel');
+        const mouseX = (x / rect.width) * 2 - 1;
+        const mouseY = (y / rect.height) * 2 - 1;
 
-    const FRAMES = 18;  // adjust for more/less depth
-    const style = getComputedStyle(document.documentElement);
-    const baseHue = parseFloat(style.getPropertyValue('--base-hue')) || 70;
-    const hueStep = parseFloat(style.getPropertyValue('--hue-step')) || 8;
-    const depth = parseFloat(style.getPropertyValue('--frame-depth')) || 40;
+        document.documentElement.style.setProperty("--mouseX", mouseX);
+        document.documentElement.style.setProperty("--mouseY", mouseY);
+      });
 
-    // Build frames
-    for (let i = 1; i <= FRAMES; i++) {
-      const f = document.createElement('div');
-      f.className = 'tunnel-frame-interactive';
+      stage.addEventListener("mouseleave", () => {
+        document.documentElement.style.setProperty("--mouseX", 0);
+        document.documentElement.style.setProperty("--mouseY", 0);
+      });
+    })();
 
-      const hue = baseHue + (i - 1) * hueStep;
-      f.style.setProperty('--tunnel-gradient', `linear-gradient(45deg, oklch(70% 0.25 ${hue}), oklch(70% 0.25 ${hue + 45}))`);
-      f.style.setProperty('--tunnel-glow', `oklch(70% 0.25 ${hue} / 0.5)`);
-      f.style.setProperty('--z', `${-1 * depth * (i - 1)}px`);
-      f.style.setProperty('--alpha', (1.1 - (i / FRAMES)).toFixed(3));
+    // video modal
+    (function () {
+      const modal = document.getElementById('videoModal');
+      const sheet = modal.querySelector('[data-modal-sheet]');
+      const openBtn = document.getElementById('learnMoreBtn');
+      const frame = document.getElementById('ytFrame');
+      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1";
 
-      container.appendChild(f);
-    }
+      function openModal(){
+        frame.src = YT_URL;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden','false');
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden','true');
+        frame.src = "";
+        openBtn.focus?.();
+      }
 
-    // Pointer-driven rotation (update CSS vars on the container)
-    const setRotation = (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;  // 0..1
-      const y = (e.clientY - rect.top) / rect.height;  // 0..1
-      const nx = (x * 2 - 1).toFixed(4);               // -1..1
-      const ny = (y * 2 - 1).toFixed(4);
-
-      container.style.setProperty('--mouseX', nx);
-      container.style.setProperty('--mouseY', ny);
-    };
-    const resetRotation = () => {
-      container.style.setProperty('--mouseX', 0);
-      container.style.setProperty('--mouseY', 0);
-    };
-
-    card.addEventListener('mousemove', setRotation);
-    card.addEventListener('mouseleave', resetRotation);
-
-    // Respect reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      card.removeEventListener('mousemove', setRotation);
-      card.removeEventListener('mouseleave', resetRotation);
-      resetRotation();
-    }
-  })();
+      openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      modal.addEventListener('click', closeModal);
+      sheet.addEventListener('click', e => e.stopPropagation());
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    })();
   </script>
 </body>
 </html>
