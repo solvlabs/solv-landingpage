@@ -22,14 +22,13 @@
       --muted:#aeb6bd;
       --btn-bg:#191b1e;
       --btn-bg-hover:#202328;
-      --gold: #e0a357;
 
-      /* Tunnel controls (JS can read these) */
-      --tunnel-frames: 24;
+      /* Tunnel controls (JS reads these) */
+      --tunnel-frames: 24;      /* desktop default; JS may lower on mobile */
       --depth-step: 38px;
       --max-rotation: 18deg;
 
-      /* Initial subtle tilt so it feels 3D even before mouse input */
+      /* Subtle initial tilt so it feels 3D before input */
       --mouseX: -0.18;
       --mouseY:  0.14;
     }
@@ -41,7 +40,7 @@
       margin:0;
       color-scheme: dark;
       font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background-color: var(--bg); /* solid fallback to prevent white flashes */
+      background-color: var(--bg); /* solid to avoid white flash */
       background-image: radial-gradient(1100px 700px at 50% 28%, #151719 0%, var(--bg) 68%);
       background-repeat: no-repeat;
       color:var(--copy);
@@ -63,7 +62,7 @@
     }
 
     /* =========================================================
-       HERO BOX + TUNNEL (the tunnel surrounds this box)
+       HERO BOX + TUNNEL (tunnel surrounds this box, never overlaps content)
        ========================================================= */
     .hero-box{
       position:relative;
@@ -74,13 +73,13 @@
       overflow:visible;
     }
 
-    /* Tunnel sits around the hero-box, expanded outward so it never covers content */
+    /* Tunnel sits AROUND hero-box, expanded outward so rings don't touch content */
     .tunnel-wrapper{
       position:absolute;
-      inset: -34px;                  /* expand tunnel beyond hero edges */
-      pointer-events:none;
+      inset: -34px;                         /* expand beyond hero edges */
       border-radius: calc(22px + 34px);
-      z-index: 1;
+      pointer-events:none;                  /* never intercept clicks */
+      z-index:1;                            /* below content */
       display:grid; place-items:center;
     }
     .tunnel-container{
@@ -88,31 +87,29 @@
       transform-style: preserve-3d;
       position:relative;
       width:100%; height:100%;
-
-      /* GPU compositor hints */
       will-change: transform;
       transform: translateZ(0)
         rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
         rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
       transition: transform .45s ease-out;
-      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
     }
 
-    /* Each tunnel frame gets its own gradient ring and glow.
-       We use a robust "background + mask" approach for borders
-       (works great across browsers—even with border-radius). */
+    /* Tunnel frame:
+       We simulate a “border-image” gradient ring using background layers,
+       which is more robust with rounded corners + 3D transforms. */
     .tunnel-frame{
       position:absolute;
       inset: clamp(8px, 1vw, 14px);
       border-radius: 28px;
 
-      /* colors injected via JS per-frame: --c1, --c2, --glow */
+      /* Colors are set from JS via CSS vars: --c1, --c2, --glow */
       background:
-        linear-gradient(#000 0 0) padding-box,         /* keep center black */
-        linear-gradient(45deg, var(--c1,#c48b4a), var(--c2,#8d5726)) border-box;
-      border: 8px solid transparent;                   /* let the gradient show on border-box */
-      box-shadow: 0 0 18px var(--glow, rgba(226,158,88,.32)),
-                  0 0 52px var(--glow, rgba(226,158,88,.18));
+        linear-gradient(#0c0d0f 0 0) padding-box, /* keeps interior black */
+        linear-gradient(45deg, var(--c1,#e8c656), var(--c2,#a25b23)) border-box;
+      border: 8px solid transparent;             /* exposes gradient ring */
+      box-shadow:
+        0 0 18px var(--glow, rgba(226,158,88,.32)),
+        0 0 52px var(--glow, rgba(226,158,88,.18));
       opacity: var(--alpha, 1);
 
       transform: translateZ(var(--z, 0));
@@ -186,12 +183,12 @@
     .reveal{ animation: reveal .9s ease both }
     @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
 
-    /* Accessibility/motion preferences */
+    /* Accessibility / motion prefs */
     @media (prefers-reduced-motion: reduce){
       .tunnel-container{ transform:none !important; transition:none }
     }
 
-    /* Mobile performance guardrails */
+    /* Mobile guardrails */
     @media (max-width: 680px){
       :root{ --depth-step: 30px }
       .tunnel-frame{ inset: 6px; border-width: 6px }
@@ -256,19 +253,23 @@
 
   <script>
     /* -----------------------------
-       3D TUNNEL (compatibility-first)
+       3D TUNNEL (Option B: JS-generated frames)
+       Palette: Yellow → Gold → Orange → Copper → Bronze
        ----------------------------- */
     (function(){
       const root = document.documentElement;
+      const heroBox = document.getElementById('heroBox');
       const container = document.getElementById('tunnel');
 
-      const FRAMES = parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24;
-      const DEPTH = parseFloat(getComputedStyle(root).getPropertyValue('--depth-step')) || 38;
+      // Mobile guardrails: fewer frames on narrow screens
+      const isMobile = window.matchMedia('(max-width: 680px)').matches;
+      const FRAMES = isMobile ? 18 : (parseInt(getComputedStyle(root).getPropertyValue('--tunnel-frames')) || 24);
+      const DEPTH  = parseFloat(getComputedStyle(root).getPropertyValue('--depth-step')) || 38;
 
-      // Bronze-family hues (HSL): yellow → gold → orange → copper → bronze
-      const hues = [48, 42, 30, 22, 16];  // degrees
-      const sat1 = 80, light1 = 60;       // bright ring color
-      const sat2 = 70, light2 = 50;       // deeper ring color
+      // Bronze family hues (HSL): yellow → gold → orange → copper → bronze
+      const hues = [54, 46, 34, 24, 18]; // tweakable; higher = more yellow
+      const satA = 80, lightA = 60;      // bright ring color
+      const satB = 70, lightB = 50;      // deeper ring color
 
       const lerp = (a,b,t)=> a + (b-a)*t;
 
@@ -279,30 +280,28 @@
         const segPos = t * (hues.length - 1);
         const seg = Math.min(hues.length - 2, Math.floor(segPos));
         const lt = segPos - seg;
-
-        const h = lerp(hues[seg], hues[seg+1], lt);
+        const h  = lerp(hues[seg], hues[seg+1], lt);
         const h2 = h - 8;
 
-        const c1 = `hsl(${h} ${sat1}% ${light1}%)`;
-        const c2 = `hsl(${h2} ${sat2}% ${light2}%)`;
+        const c1 = `hsl(${h} ${satA}% ${lightA}%)`;
+        const c2 = `hsl(${h2} ${satB}% ${lightB}%)`;
         const glow = `hsla(${h}, 75%, 58%, 0.28)`;
 
-        const d = -1 * DEPTH * i;
-        const alpha = 1.02 - (i / FRAMES); // gentle fade with depth
+        const depth = -1 * DEPTH * i;
+        const alpha = 1.02 - (i / FRAMES);
 
-        const f = document.createElement('div');
-        f.className = 'tunnel-frame';
-        f.style.setProperty('--c1', c1);
-        f.style.setProperty('--c2', c2);
-        f.style.setProperty('--glow', glow);
-        f.style.setProperty('--z', d + 'px');
-        f.style.setProperty('--alpha', alpha.toFixed(3));
-        frag.appendChild(f);
+        const frame = document.createElement('div');
+        frame.className = 'tunnel-frame';
+        frame.style.setProperty('--c1', c1);
+        frame.style.setProperty('--c2', c2);
+        frame.style.setProperty('--glow', glow);
+        frame.style.setProperty('--z', depth + 'px');
+        frame.style.setProperty('--alpha', alpha.toFixed(3));
+        frag.appendChild(frame);
       }
       container.appendChild(frag);
 
-      // Pointer tilt (smoothed with rAF)
-      const heroBox = document.getElementById('heroBox');
+      // Pointer tilt (rAF-smoothed)
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
 
@@ -321,11 +320,10 @@
         targetX = -0.18;
         targetY =  0.14;
       }
-      heroBox.addEventListener('mousemove', onMove);
+      heroBox.addEventListener('mousemove', onMove, {passive:true});
       heroBox.addEventListener('mouseleave', onLeave);
 
       function tick(){
-        // ease toward target
         curX += (targetX - curX) * 0.08;
         curY += (targetY - curY) * 0.08;
         root.style.setProperty('--mouseX', curX.toFixed(3));
@@ -336,7 +334,7 @@
     })();
 
     /* -----------------------------
-       Modal (click-outside closes)
+       Modal (click-outside closes) + 720p hint
        ----------------------------- */
     (function(){
       const modal = document.getElementById('videoModal');
