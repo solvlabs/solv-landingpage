@@ -8,46 +8,58 @@
   <!-- SEO -->
   <meta name="description" content="SOLV provides runtime observability, policy enforcement, and claims-grade evidence so insurers can price autonomous AI. Real-time, inference-speed proofs for safety and accountability.">
 
+  <!-- Structured data: recognition / award -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Solv",
+    "url": "https://solvrisk.xyz",
+    "award": "LatAm Insurtech Accelerator Cohort #3 (2024)",
+    "sameAs": [
+      "https://www.linkedin.com/company/solvxyz/",
+      "https://www.insurtechteam.com/"
+    ]
+  }
+  </script>
+
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg: #0e0f10;
-      --ink: #e9edf0;
+      --copy: #e9edf0;
       --muted:#aeb6bd;
-      --btn-bg:#1a1c1f;
-      --btn-bg-hover:#1f2226;
+      --btn-bg:#191b1e;
+      --btn-bg-hover:#202328;
 
-      /* Brand metals (OKLCH hue angles; gold → bronze) */
-      --hBase: 64;           /* warm gold */
-      --hStep: -1.1;         /* shifts toward bronze/copper per frame */
+      /* bronze family */
+      --accent:  #c38d53; /* bronze */
+      --accent-2:#e0a357; /* gold */
 
-      /* Tunnel controls */
-      --frames: 16;
-      --depth-step: 36px;
-      --max-rotation: 12deg;
+      /* tunnel controls */
+      --tunnel-frames: 24;
+      --depth-step: 38px;
+      --max-rotation: 18deg;
 
-      /* Anim registers (numeric custom props so they can animate) */
-      --hShift: 0;           /* small hue drift ±3 */
-      --glow: .38;           /* shadow/glow strength 0..1 */
+      /* warm hue sweep (oklch hue angles) */
+      --hBase: 56;    /* yellow-gold start */
+      --hStep: -1.15; /* trends to copper/bronze */
     }
-
-    @property --hShift { syntax: "<number>"; inherits: false; initial-value: 0; }
-    @property --glow   { syntax: "<number>"; inherits: false; initial-value: .38; }
 
     /* Base */
     *,*::before,*::after{ box-sizing:border-box }
     html,body{ height:100% }
     body{
       margin:0;
-      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 50% 24%, #141618, var(--bg) 62%);
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1100px 700px at 50% 28%, #151719, var(--bg) 68%);
+      color:var(--copy);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     /* Layout */
@@ -55,121 +67,133 @@
     .frame{
       position:relative;
       width:min(1160px, 95vw);
-      border-radius:22px;
-      background:linear-gradient(#101112,#0f1011);
-      box-shadow:0 28px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
-      isolation:isolate;
+      padding: clamp(18px, 2.4vw, 24px);
+      border-radius:20px;
+      background: linear-gradient(#101112, #0f1011);
+      box-shadow: 0 30px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
       overflow:visible;
-      padding: clamp(22px, 2.8vw, 30px);
+      isolation:isolate;
     }
 
-    /* HERO BOX */
+    /* =========================================================
+       HERO BOX + TUNNEL (the tunnel surrounds this box)
+       ========================================================= */
     .hero-box{
       position:relative;
-      border-radius:20px;
-      background:
-        radial-gradient(110% 90% at 50% 40%, #0a0b0c 60%, #0a0b0c 62%, transparent 100%),
-        #0a0b0c;
-      box-shadow:0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
-      padding: clamp(48px, 6vw, 82px) clamp(32px, 5vw, 64px) clamp(56px, 7vw, 92px);
+      border-radius:22px;
+      background: #0c0d0f; /* solid dark center behind content */
+      padding: clamp(42px, 6vw, 72px) clamp(28px, 4.5vw, 56px) clamp(48px, 6.5vw, 84px);
+      box-shadow: 0 10px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
+      overflow:visible;
     }
 
-    /* TUNNEL */
-    .tunnel{
-      position:absolute; inset:-40px; border-radius:28px; pointer-events:none;
-      display:grid; place-items:center; z-index:1;
+    .tunnel-wrapper{
+      position:absolute;
+      inset: -34px;                 /* expand tunnel beyond hero edges */
+      pointer-events:none;
+      border-radius: calc(22px + 34px);
+      display:grid; place-items:center;
+      z-index:1;
     }
-    .tunnel-3d{
-      perspective:960px; transform-style:preserve-3d; will-change:transform, filter;
-      width:100%; height:100%;
-      transform:
-        rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
-        rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
+    .tunnel-container{
+      perspective: 900px; transform-style: preserve-3d;
+      position:relative; width:100%; height:100%;
+      transform: rotateX(calc(var(--mouseY,0) * var(--max-rotation) * -1))
+                 rotateY(calc(var(--mouseX,0) * var(--max-rotation)));
       transition: transform .45s ease-out, filter .2s ease;
       filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
-      animation: hueDrift 12s ease-in-out infinite, glowPulse 7s ease-in-out infinite;
     }
-    .ring{
-      position:absolute; inset: clamp(10px, 1.1vw, 14px);
-      border-radius:26px;
-      --i:1; /* set inline */
-      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep) + var(--hShift));
+    .tunnel-frame{
+      position:absolute;
+      inset: clamp(8px, 1vw, 14px);  /* keep lines near outer edge */
+      border-radius: 28px;
+      --i: 1;                        /* set inline per frame */
+      --hA: calc(var(--hBase) + (var(--i) - 1) * var(--hStep));
       --hB: calc(var(--hA) - 10);
-      border:8px solid;
-      border-image-slice:1;
+      border: 8px solid;
+      border-image-slice: 1;
       border-image-source:
-        linear-gradient(45deg, oklch(72% 0.15 var(--hA)), oklch(68% 0.11 var(--hB)));
+        linear-gradient(45deg, oklch(72% 0.16 var(--hA)), oklch(68% 0.12 var(--hB)));
       box-shadow:
-        0 0 18px oklch(70% 0.13 var(--hA) / calc(var(--glow) * .9)),
-        0 0 52px oklch(68% 0.11 var(--hB) / calc(var(--glow) * .55));
-      opacity: calc(.98 - (var(--i) / (var(--frames) + 3)));
+        0 0 18px oklch(70% 0.14 var(--hA) / .36),
+        0 0 52px oklch(68% 0.12 var(--hB) / .22);
+      opacity: calc(1.02 - (var(--i) / var(--tunnel-frames)));
       transform: translateZ(calc(-1 * var(--depth-step) * (var(--i) - 1)));
     }
-    @supports not (color: oklch(70% 0 50)){
-      .ring{
-        border-image-source: linear-gradient(45deg, #f3c96b, #c47933);
-        box-shadow: 0 0 18px rgba(233,179,90,.35), 0 0 52px rgba(196,121,51,.22);
-      }
+    @supports not (color: oklch(50% 0 0)){
+      .tunnel-frame{ border-image-source: linear-gradient(45deg, #f1c36a, #c67934) }
     }
-    @keyframes hueDrift{ 0%{--hShift:-3} 50%{--hShift:3} 100%{--hShift:-3} }
-    @keyframes glowPulse{ 0%,100%{--glow:.36} 50%{--glow:.50} }
 
-    /* Foreground */
-    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; gap: clamp(16px, 2.4vw, 24px) }
-
-    .logo{
-      width: clamp(260px, 30vw, 360px); height:auto; display:block; user-select:none;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,.45));
-      position:relative;
+    /* Hero content sits ABOVE tunnel */
+    .hero{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap: clamp(16px, 2.4vw, 24px); text-align:center }
+    .logo-emblem{
+      width: clamp(260px, 30vw, 380px);
+      height:auto; display:block; user-select:none;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
     }
-    .logo::after{
-      content:""; position:absolute; inset:0; pointer-events:none;
-      background:
-        radial-gradient(16px 10px at 52% 44%, rgba(255,240,210,.10), transparent 60%),
-        radial-gradient(16px 10px at 48% 44%, rgba(255,240,210,.10), transparent 60%);
-      opacity:0;
-      animation: glint 1.2s ease-in-out 14s infinite;
-    }
-    @keyframes glint{ 0%{opacity:0;transform:translateX(-4px)} 30%{opacity:.08} 100%{opacity:0;transform:translateX(4px)} }
-
     h1{
-      margin:8px 0 0;
-      font-size: clamp(24px, 2.35vw, 36px);
-      font-weight:700; line-height:1.24; text-wrap:balance;
+      margin: 6px 0 0; font-weight:700;
+      font-size: clamp(24px, 2.4vw, 34px); line-height:1.25;
+      text-wrap:balance;
       max-width:min(34ch, 92%);
     }
     .subhead{
-      margin:4px 0 0; color:var(--muted);
-      font-weight:600; font-size: clamp(15px, 1.3vw, 18px); line-height:1.5;
-      max-width:min(62ch, 92%);
+      margin: 6px 0 0; color:var(--muted);
+      font-weight:500; font-size: clamp(15px, 1.35vw, 18px); line-height:1.45;
+      max-width:min(60ch, 92%);
     }
 
-    /* CTAs: equal-weight bronze outline */
+    /* CTAs */
     .actions{ display:flex; gap:14px; margin-top: clamp(14px, 2.1vw, 22px); flex-wrap:wrap; justify-content:center }
     .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
-      height:48px; padding:0 28px; border-radius:12px; white-space:nowrap;
-      background: var(--btn-bg);
-      color: var(--ink); text-decoration:none; font:600 16px/1 "Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+      display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+      height:48px; padding:0 26px; border-radius:12px;
       border:1px solid rgba(224,163,87,.55);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .06s ease;
+      background: var(--btn-bg); color: var(--copy);
+      text-decoration:none; white-space:nowrap;
+      font: 600 16px/1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      letter-spacing:.01em;
+      transition: background .2s ease, transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+      box-shadow: 0 0 0 0 rgba(224,163,87,.0);
     }
     .btn:hover{
       background: var(--btn-bg-hover);
-      border-color: rgba(224,163,87,.85);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.08),
-        0 0 18px rgba(224,163,87,.25);
+      border-color: rgba(224,163,87,.8);
+      box-shadow: 0 0 24px rgba(224,163,87,.2);
     }
     .btn:active{ transform: translateY(1px) }
 
+    /* Proof badge (LatAm Insurtech) */
+    .proof { margin-top: 10px; }
+    .proof-badge{
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:8px 12px; border-radius:999px;
+      font: 600 12.5px/1.1 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      color:#e9edf0; text-decoration:none;
+      border:1px solid rgba(224,163,87,.38);
+      background: linear-gradient(180deg, rgba(224,163,87,.10), rgba(224,163,87,.06));
+      box-shadow: 0 0 18px rgba(224,163,87,.18) inset, 0 6px 24px rgba(0,0,0,.25);
+      transition: border-color .2s ease, box-shadow .2s ease, transform .06s ease, background .2s ease;
+    }
+    .proof-badge:hover{
+      border-color: rgba(224,163,87,.65);
+      background: linear-gradient(180deg, rgba(224,163,87,.14), rgba(224,163,87,.08));
+      box-shadow: 0 0 22px rgba(224,163,87,.26) inset, 0 10px 28px rgba(0,0,0,.28);
+    }
+    .proof-ico{ width:16px; height:16px; color:#c38d53; flex:0 0 16px }
+    .proof-text strong{ font-weight:700; letter-spacing:.01em; }
+    .proof-text .year{ opacity:.7; font-weight:600 }
+    @media (max-width:480px){
+      .proof-badge{ padding:7px 10px; font-size:12px }
+      .proof-ico{ width:14px; height:14px }
+    }
+
     /* Footer */
-    footer{ margin-top: clamp(16px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
+    footer{ margin-top: clamp(14px, 2.4vw, 24px); display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap }
     .social{
       display:inline-flex; align-items:center; justify-content:center;
       width:32px; height:32px; border-radius:10px;
-      color:var(--ink); text-decoration:none;
+      color:var(--copy); text-decoration:none;
       border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02);
       transition: border-color .2s ease, background .2s ease, transform .06s ease;
     }
@@ -177,53 +201,52 @@
     .social svg{ width:18px; height:18px; fill: currentColor }
     .copyright{ width:100%; text-align:center; margin-top:6px; font-size:12px; color:#88939c }
 
-    /* Modal */
-    .modal{ position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
-      display:grid; place-items:center; opacity:0; visibility:hidden; transition: opacity .18s ease, visibility .18s ease; z-index:50 }
-    .modal.open{ opacity:1; visibility:visible }
-    .modal-sheet{ width: min(980px, 92vw); aspect-ratio: 16/9; border-radius:16px; background:#000;
-      overflow:hidden; box-shadow: 0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset }
-    .modal iframe{ width:100%; height:100%; border:0; display:block }
+    .reveal{ animation: reveal .9s ease both }
+    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
 
     @media (prefers-reduced-motion: reduce){
-      .tunnel-3d{ animation:none !important; transform:none !important; transition:none !important }
-      .logo::after{ animation:none !important }
+      .tunnel-container{ transform:none !important; transition:none }
     }
-
-    .reveal{ animation: reveal .8s ease both }
-    @keyframes reveal{ from{opacity:0; transform: translateY(8px) scale(.995)} to{opacity:1; transform:none} }
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="frame reveal" aria-label="SOLV hero">
-      <!-- TUNNEL (behind hero) -->
-      <div class="tunnel" aria-hidden="true">
-        <div class="tunnel-3d" id="tunnel3d">
-          <!-- 16 rings -->
-          <div class="ring" style="--i:1"></div>
-          <div class="ring" style="--i:2"></div>
-          <div class="ring" style="--i:3"></div>
-          <div class="ring" style="--i:4"></div>
-          <div class="ring" style="--i:5"></div>
-          <div class="ring" style="--i:6"></div>
-          <div class="ring" style="--i:7"></div>
-          <div class="ring" style="--i:8"></div>
-          <div class="ring" style="--i:9"></div>
-          <div class="ring" style="--i:10"></div>
-          <div class="ring" style="--i:11"></div>
-          <div class="ring" style="--i:12"></div>
-          <div class="ring" style="--i:13"></div>
-          <div class="ring" style="--i:14"></div>
-          <div class="ring" style="--i:15"></div>
-          <div class="ring" style="--i:16"></div>
-        </div>
-      </div>
-
-      <!-- HERO CONTENT -->
       <div class="hero-box" id="heroBox">
+        <!-- Tunnel sits behind and OUTSIDE this hero-box -->
+        <div class="tunnel-wrapper" aria-hidden="true">
+          <div class="tunnel-container">
+            <!-- 24 frames -->
+            <div class="tunnel-frame" style="--i:1"></div>
+            <div class="tunnel-frame" style="--i:2"></div>
+            <div class="tunnel-frame" style="--i:3"></div>
+            <div class="tunnel-frame" style="--i:4"></div>
+            <div class="tunnel-frame" style="--i:5"></div>
+            <div class="tunnel-frame" style="--i:6"></div>
+            <div class="tunnel-frame" style="--i:7"></div>
+            <div class="tunnel-frame" style="--i:8"></div>
+            <div class="tunnel-frame" style="--i:9"></div>
+            <div class="tunnel-frame" style="--i:10"></div>
+            <div class="tunnel-frame" style="--i:11"></div>
+            <div class="tunnel-frame" style="--i:12"></div>
+            <div class="tunnel-frame" style="--i:13"></div>
+            <div class="tunnel-frame" style="--i:14"></div>
+            <div class="tunnel-frame" style="--i:15"></div>
+            <div class="tunnel-frame" style="--i:16"></div>
+            <div class="tunnel-frame" style="--i:17"></div>
+            <div class="tunnel-frame" style="--i:18"></div>
+            <div class="tunnel-frame" style="--i:19"></div>
+            <div class="tunnel-frame" style="--i:20"></div>
+            <div class="tunnel-frame" style="--i:21"></div>
+            <div class="tunnel-frame" style="--i:22"></div>
+            <div class="tunnel-frame" style="--i:23"></div>
+            <div class="tunnel-frame" style="--i:24"></div>
+          </div>
+        </div>
+
+        <!-- Foreground content -->
         <div class="hero">
-          <img class="logo" src="Transparent Logo.svg" alt="SOLV lion logo"/>
+          <img class="logo-emblem" src="Transparent Logo.svg" alt="SOLV logo" />
 
           <h1>Make autonomous AI insurable — with runtime evidence.</h1>
           <p class="subhead">Continuous observability, policy checks, and claims-grade logs — generated at inference time.</p>
@@ -232,7 +255,22 @@
             <a class="btn"
                href="mailto:patrick@solvrisk.xyz?subject=Intro%20to%20Solv&body=Hi%20Solv%20team%2C%20I%E2%80%99d%20like%20to%20learn%20more%20about%20your%20runtime%20evidence%20platform.%0AWe%20use%3A%20_____%0AThanks!"
                aria-label="Talk to Solv by email">Talk to Solv</a>
-            <a class="btn" href="#" id="whyBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv? Video">Why Solv?</a>
+            <a class="btn" href="#" id="whySolvBtn" role="button" aria-haspopup="dialog" aria-controls="videoModal" aria-label="Why Solv?">Why Solv?</a>
+          </div>
+
+          <!-- Proof badge -->
+          <div class="proof">
+            <a class="proof-badge"
+               href="https://www.linkedin.com/posts/insurtechteam_insurtechlatam-cohortbatch03-innovaciaejn-activity-7245145645966086146-TqhH"
+               target="_blank" rel="noopener">
+              <svg class="proof-ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2l8 3v6c0 5.25-3.7 9.86-8 11-4.3-1.14-8-5.75-8-11V5l8-3z" fill="currentColor"/>
+                <path d="M10.2 12.7l-2-2 1.4-1.4 1.3 1.3 3.5-3.5 1.4 1.4-4.9 4.9z" fill="#0e0f10"/>
+              </svg>
+              <span class="proof-text">
+                Selected for <strong>LatAm Insurtech Cohort #3</strong> <span class="year">(2024)</span>
+              </span>
+            </a>
           </div>
 
           <footer>
@@ -250,63 +288,58 @@
   </main>
 
   <!-- Video modal -->
-  <div class="modal" id="videoModal" aria-hidden="true" aria-label="Why Solv video">
-    <div class="modal-sheet" data-modal-sheet>
-      <iframe
-        id="ytFrame"
-        title="SOLV — Why Solv?"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
-    </div>
+  <div class="modal" id="videoModal" aria-hidden="true" aria-label="SOLV demo video" style="position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); display:grid; place-items:center; opacity:0; visibility:hidden; transition:opacity .18s ease, visibility .18s ease; z-index:50;">
+    <div class="modal-sheet" data-modal-sheet style="width:min(980px,92vw); aspect-ratio:16/9; border-radius:16px; background:#000; overflow:hidden; box-shadow:0 20px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset;"></div>
   </div>
 
   <script>
-    // Parallax tilt (capped), motion-respecting
+    /* Mouse tilt on the hero-box (respect reduced motion) */
     (function(){
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) return;
-      const hero = document.getElementById('heroBox');
+
+      const box = document.getElementById('heroBox');
       const root = document.documentElement;
 
       function setMouse(e){
-        const r = hero.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;
-        const y = (e.clientY - r.top) / r.height;
-        root.style.setProperty('--mouseX', (x*2 - 1).toFixed(3));
-        root.style.setProperty('--mouseY', (y*2 - 1).toFixed(3));
+        const r = box.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;   // 0..1
+        const y = (e.clientY - r.top) / r.height;   // 0..1
+        root.style.setProperty('--mouseX', (x * 2 - 1).toFixed(3));
+        root.style.setProperty('--mouseY', (y * 2 - 1).toFixed(3));
       }
-      hero.addEventListener('mousemove', setMouse);
-      hero.addEventListener('mouseleave', ()=> {
+      box.addEventListener('mousemove', setMouse);
+      box.addEventListener('mouseleave', ()=> {
         root.style.setProperty('--mouseX', 0);
         root.style.setProperty('--mouseY', 0);
       });
     })();
 
-    // Modal open/close + 720p hint
+    /* Simple modal that opens a YouTube "Why Solv?" video; click outside closes */
     (function(){
       const modal = document.getElementById('videoModal');
       const sheet = modal.querySelector('[data-modal-sheet]');
-      const openBtn = document.getElementById('whyBtn');
-      const frame = document.getElementById('ytFrame');
-      const YT_URL = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
+      const openBtn = document.getElementById('whySolvBtn');
+      const YT = "https://www.youtube.com/embed/-nls6846TPs?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd720";
 
       function openModal(){
-        frame.src = YT_URL;
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden','false');
+        sheet.innerHTML = '<iframe title="Why Solv?" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;display:block" src="'+YT+'"></iframe>';
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
       }
       function closeModal(){
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden','true');
-        frame.src = "";
-        openBtn?.focus();
+        modal.style.opacity = '0';
+        modal.style.visibility = 'hidden';
+        sheet.innerHTML = '';
+        openBtn && openBtn.focus && openBtn.focus();
       }
-      openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+
+      if (openBtn){
+        openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      }
       modal.addEventListener('click', closeModal);
       sheet.addEventListener('click', e => e.stopPropagation());
-      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.style.visibility === 'visible') closeModal(); });
     })();
   </script>
 </body>
